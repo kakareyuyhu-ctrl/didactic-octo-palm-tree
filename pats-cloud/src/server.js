@@ -11,7 +11,7 @@ import crypto from 'crypto';
 import rateLimit from 'express-rate-limit';
 import { execFile } from 'child_process';
 import mime from 'mime-types';
-import { isCloudConfigured, uploadFileToCloud, getTeraboxConfig, setTeraboxConfig, getTeraboxAuthUrl, handleTeraboxOAuthCallback } from './cloud.js';
+import { isCloudConfigured, uploadFileToCloud, getTeraboxConfig, setTeraboxConfig, getTeraboxAuthUrl, handleTeraboxOAuthCallback, setMegaConfig } from './cloud.js';
 
 dotenv.config();
 
@@ -420,6 +420,13 @@ app.get('/api/cloud/terabox/oauth/callback', requireAuth, async (req, res) => {
   } catch (e) {
     res.status(500).json({ error: 'OAuth failed' });
   }
+});
+
+app.post('/api/cloud/mega', requireAuth, express.json(), (req, res) => {
+  const { email, password, dir } = req.body || {};
+  if (!email || !password) return res.status(400).json({ error: 'Missing fields' });
+  setMegaConfig({ email, password, dir });
+  res.json({ ok: true });
 });
 
 app.delete('/api/upload/abort/:uploadId', requireAuth, async (req, res) => {

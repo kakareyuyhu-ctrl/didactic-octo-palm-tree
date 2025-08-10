@@ -9,6 +9,7 @@ let uploader = null;
 let currentProvider = provider;
 let teraboxCreds = null; // { ndus, appId, uploadId?, jsToken?, browserId?, dir }
 let teraboxOAuth = null; // { access_token, refresh_token?, expires_at?, dir }
+let megaCreds = null; // { email, password, dir }
 
 const CONFIG_PATH = path.resolve(path.dirname(new URL(import.meta.url).pathname), '..', 'cloud.json');
 
@@ -35,6 +36,10 @@ function loadPersisted() {
         expires_at: cfg.terabox_oauth.expires_at || 0,
         dir: (cfg.terabox_oauth.dir || cfg.terabox?.dir || '/')
       };
+    }
+    if (cfg && cfg.mega && cfg.mega.email && cfg.mega.password) {
+      currentProvider = 'mega';
+      megaCreds = { email: cfg.mega.email, password: cfg.mega.password, dir: cfg.mega.dir || '/' };
     }
   } catch {}
 }
@@ -73,11 +78,20 @@ if (provider === 's3') {
     };
     currentProvider = 'terabox';
   }
+} else if (provider === 'mega' && !megaCreds) {
+  const email = process.env.MEGA_EMAIL || '';
+  const password = process.env.MEGA_PASSWORD || '';
+  const dir = process.env.MEGA_DIR || '/';
+  if (email && password) {
+    megaCreds = { email, password, dir };
+    currentProvider = 'mega';
+  }
 }
 
 export function isCloudConfigured() {
   if (currentProvider === 's3') return Boolean(uploader);
   if (currentProvider === 'terabox') return Boolean(teraboxCreds) || Boolean(teraboxOAuth?.access_token);
+  if (currentProvider === 'mega') return Boolean(megaCreds);
   return false;
 }
 
@@ -111,6 +125,26 @@ export async function uploadFileToCloud(filePath, key, contentType) {
     }
     throw new Error('Cloud not configured');
   }
+  if (currentProvider === 'mega') {
+    if (!megaCreds) throw new Error('Cloud not configured');
+    const { Storage } = await import('megajs');
+    const storage = new Storage({ email: megaCreds.email, password: megaCreds.password });
+    await new Promise((resolve, reject) => storage.login((err) => (err ? reject(err) : resolve())));
+    let target = storage.root;
+    if (megaCreds.dir && megaCreds.dir !== '/') {
+      const parts = megaCreds.dir.replace(/^\/+/, '').split('/').filter(Boolean);
+      for (const p of parts) {
+        let folder = target.children?.find?.((c) => c.name === p && c.directory);
+        if (!folder) {
+          // create folder
+          folder = await new Promise((resolve, reject) => target.mkdir(p, (err, f) => (err ? reject(err) : resolve(f))));
+        }
+        target = folder;
+      }
+    }
+    await new Promise((resolve, reject) => target.upload(filePath, (err, _file) => (err ? reject(err) : resolve())));
+    return;
+  }
   throw new Error('No cloud provider');
 }
 
@@ -126,6 +160,16 @@ export function setTeraboxConfig({ ndus, appId, dir, uploadId, jsToken, browserI
   try {
     const out = { terabox: teraboxCreds };
     fs.writeFileSync(CONFIG_PATH, JSON.stringify(out, null, 2));
+  } catch {}
+}
+
+export function setMegaConfig({ email, password, dir }) {
+  currentProvider = 'mega';
+  megaCreds = { email, password, dir: dir || '/' };
+  try {
+    const existing = fs.existsSync(CONFIG_PATH) ? JSON.parse(fs.readFileSync(CONFIG_PATH, 'utf8')) : {};
+    existing.mega = megaCreds;
+    fs.writeFileSync(CONFIG_PATH, JSON.stringify(existing, null, 2));
   } catch {}
 }
 

@@ -1,34 +1,13 @@
-[dotenv@17.2.1] injecting env (0) from .env -- tip: 📡 observe env with Radar: https://dotenvx.com/radar
-[dotenv@17.2.1] injecting env (0) from .env -- tip: ⚙️  load multiple .env files with { path: ['.env.local', '.env'] }
+[dotenv@17.2.1] injecting env (0) from .env -- tip: 🛠️  run anywhere with `dotenvx run -- yourcommand`
+[dotenv@17.2.1] injecting env (0) from .env -- tip: ⚙️  write to custom object with { processEnv: myObject }
 Pats Cloud running on http://localhost:3000
-[0mPOST /login [32m200[0m 10.171 ms - 11[0m
-[0mPOST /api/cloud/terabox [32m200[0m 1.480 ms - 11[0m
-[0mPOST /api/upload [32m200[0m 4.267 ms - 70[0m
-[0mGET /api/cloud/events [32m200[0m 0.637 ms - 80[0m
-[0mGET /api/storage [33m401[0m 0.846 ms - 24[0m
-[0mGET /api/storage [33m401[0m 0.567 ms - 24[0m
-[0mPOST /api/cloud/terabox [33m401[0m 0.355 ms - 24[0m
-[0mPOST /api/cloud/terabox [33m401[0m 0.280 ms - 24[0m
-[0mPOST /api/cloud/terabox [33m401[0m 0.421 ms - 24[0m
-[0mGET /api/storage [33m401[0m 0.408 ms - 24[0m
-[0mGET /api/storage [33m401[0m 0.263 ms - 24[0m
-[0mPOST /api/cloud/terabox [33m401[0m 0.256 ms - 24[0m
-[0mGET /api/storage [33m401[0m 0.251 ms - 24[0m
-[0mGET /api/storage [33m401[0m 0.689 ms - 24[0m
-[0mGET /api/storage [33m401[0m 0.391 ms - 24[0m
-[0mGET /api/storage [33m401[0m 0.254 ms - 24[0m
-[0mPOST /api/cloud/terabox [33m401[0m 0.265 ms - 24[0m
-[0mGET /api/storage [33m401[0m 0.242 ms - 24[0m
-[0mPOST /api/cloud/terabox [33m401[0m 0.241 ms - 24[0m
-[0mPOST /api/cloud/terabox [33m401[0m 0.238 ms - 24[0m
-[0mGET /api/storage [33m401[0m 0.224 ms - 24[0m
-[0mGET /api/storage [33m401[0m 0.235 ms - 24[0m
-[0mGET /api/storage [33m401[0m 0.203 ms - 24[0m
-[0mGET /api/storage [33m401[0m 0.249 ms - 24[0m
-[0mGET /api/storage [33m401[0m 0.572 ms - 24[0m
-[0mGET /api/storage [33m401[0m 0.266 ms - 24[0m
-[0mGET /api/storage [33m401[0m 0.228 ms - 24[0m
-[0mGET /api/storage [33m401[0m 0.249 ms - 24[0m
-[0mGET /api/storage [33m401[0m 0.334 ms - 24[0m
-[0mGET /api/storage [33m401[0m 0.520 ms - 24[0m
-[0mGET /api/storage [33m401[0m 0.392 ms - 24[0m
+[0mPOST /login [32m200[0m 10.921 ms - 11[0m
+[0mGET /api/cloud/status [32m200[0m 1.097 ms - 16[0m
+[0mPOST /api/upload [32m200[0m 4.335 ms - 70[0m
+[0mGET /api/cloud/events [32m200[0m 0.518 ms - 147[0m
+[0mGET /api/storage [33m401[0m 0.829 ms - 24[0m
+[0mGET / [36m304[0m 1.767 ms - -[0m
+[0mGET /api/files [33m401[0m 0.276 ms - 24[0m
+[0mGET /api/cloud/status [33m401[0m 0.268 ms - 24[0m
+[0mGET /api/storage [33m401[0m 0.342 ms - 24[0m
+[0mGET /api/folders [33m401[0m 0.360 ms - 24[0m
