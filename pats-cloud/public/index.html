@@ -326,7 +326,7 @@
     async function acceleratedDownload(fileName, fileSize) {
       try {
         const url = `/file/${encodeURIComponent(fileName)}`;
-        const parallel = Math.min(3, Math.ceil(fileSize / (2 * 1024 * 1024)) || 1);
+        const parallel = Math.min(2, Math.ceil(fileSize / (8 * 1024 * 1024)) || 1);
         const chunkSize = Math.ceil(fileSize / parallel);
         const ranges = Array.from({ length: parallel }, (_, i) => ({
           start: i * chunkSize,
@@ -382,8 +382,8 @@
     }
 
     async function uploadFileChunked(file, opts) {
-      const chunkSize = opts?.chunkSize ?? 2 * 1024 * 1024; // default 2MB
-      const concurrency = opts?.concurrency ?? 2; // default parallel 2
+      const chunkSize = opts?.chunkSize ?? 1 * 1024 * 1024; // default 1MB
+      const concurrency = opts?.concurrency ?? 1; // default parallel 1
       const attempt = opts?.attempt ?? 1;
       const totalChunks = Math.ceil(file.size / chunkSize);
       const { base: baseUp, ext: extUp, display: displayUp } = formatFilenameForMobile(file.name)
