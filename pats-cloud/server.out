@@ -31,3 +31,7 @@ Pats Cloud running on http://localhost:3000
 [0mGET /api/storage [32m200[0m 0.919 ms - 73[0m
 [0mGET /api/storage [32m200[0m 0.937 ms - 73[0m
 [0mGET /api/storage [32m200[0m 1.439 ms - 73[0m
+[0mGET /api/storage [32m200[0m 1.257 ms - 73[0m
+[0mGET /api/storage [32m200[0m 1.518 ms - 73[0m
+[0mGET /api/storage [32m200[0m 1.592 ms - 73[0m
+[0mGET /api/storage [32m200[0m 2.332 ms - 73[0m

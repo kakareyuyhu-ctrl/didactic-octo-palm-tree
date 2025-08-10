@@ -11,7 +11,7 @@ import crypto from 'crypto';
 import rateLimit from 'express-rate-limit';
 import { execFile } from 'child_process';
 import mime from 'mime-types';
-import { isCloudConfigured, uploadStreamToCloud } from './cloud.js';
+import { isCloudConfigured, uploadFileToCloud } from './cloud.js';
 
 dotenv.config();
 
@@ -355,8 +355,7 @@ app.post('/api/upload/complete', requireAuth, limiter, express.json(), async (re
     // Background cloud mirror
     if (enableCloudMirror && isCloudConfigured()) {
       const key = path.posix.join(cloudPrefix, (meta.folder || ''), path.basename(outPath)).replace(/\\/g, '/');
-      const stream = fs.createReadStream(outPath);
-      uploadStreamToCloud(stream, key, mime.lookup(outPath) || 'application/octet-stream').catch(() => {});
+      uploadFileToCloud(outPath, key, mime.lookup(outPath) || 'application/octet-stream').catch(() => {});
     }
     res.json({ ok: true, file: { name: path.basename(outPath), size: stat.size }, mirrored: enableCloudMirror && isCloudConfigured() });
   } catch (e) {
