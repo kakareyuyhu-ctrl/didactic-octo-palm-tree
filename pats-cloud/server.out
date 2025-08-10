@@ -1,3 +1,21 @@
 [dotenv@17.2.1] injecting env (0) from .env -- tip: 📡 observe env with Radar: https://dotenvx.com/radar
 Pats Cloud running on http://localhost:3000
 [0mGET / [32m200[0m 3.524 ms - 9183[0m
+[0mGET / [32m200[0m 1.491 ms - 9183[0m
+[0mGET /api/files [33m401[0m 1.125 ms - 24[0m
+[0mPOST /logout [32m200[0m 0.731 ms - 11[0m
+[0mPOST /login [33m401[0m 0.412 ms - 28[0m
+[0mPOST /login [32m200[0m 0.764 ms - 11[0m
+[0mGET /api/files [32m200[0m 1.426 ms - 12[0m
+[0mGET /api/files [36m304[0m 1.220 ms - -[0m
+[0mGET / [36m304[0m 1.731 ms - -[0m
+[0mGET /api/files [36m304[0m 0.904 ms - -[0m
+[0mPOST /api/upload [32m200[0m 30.322 ms - 111[0m
+[0mGET / [36m304[0m 0.594 ms - -[0m
+[0mGET /api/files [32m200[0m 1.448 ms - 130[0m
+[0mGET /api/files [36m304[0m 1.232 ms - -[0m
+[0mDELETE /api/files/1754857402396_Hwhdjjs-cursor-build-patshi-admin-panel-1f62.zip [32m200[0m 1.110 ms - 11[0m
+[0mGET /api/files [32m200[0m 0.813 ms - 12[0m
+[0mGET /api/files [36m304[0m 1.022 ms - -[0m
+[0mGET / [36m304[0m 0.616 ms - -[0m
+[0mGET /api/files [36m304[0m 0.821 ms - -[0m
