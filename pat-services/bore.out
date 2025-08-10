@@ -1,0 +1,5 @@
+npm error code ETARGET
+npm error notarget No matching version found for bore-cli@latest.
+npm error notarget In most cases you or one of your dependencies are requesting
+npm error notarget a package version that doesn't exist.
+npm error A complete log of this run can be found in: /home/ubuntu/.npm/_logs/2025-08-10T19_19_39_950Z-debug-0.log
