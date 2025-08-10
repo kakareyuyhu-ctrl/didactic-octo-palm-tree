@@ -34,6 +34,10 @@ h1 {
   letter-spacing: 0.3px;
   margin: 8px 0 24px;
   font-size: 32px;
+  background: linear-gradient(90deg, #8ec5ff, #15c39a 60%, #8ec5ff 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
 }
 
 form {
@@ -90,8 +94,13 @@ input[type="url"]:focus { border-color: var(--accent); box-shadow: 0 0 0 5px rgb
 
 @keyframes spin { to { transform: rotate(360deg); } }
 
-.result { margin-top: 18px; padding: 16px; border: 1px solid var(--border); border-radius: 14px; background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01)); box-shadow: var(--shadow); opacity: 0; transform: translateY(8px); transition: opacity .25s ease, transform .25s ease; }
-.result.visible { opacity: 1; transform: translateY(0); }
+.result { 
+  margin-top: 18px; padding: 16px; border: 1px solid var(--border); border-radius: 14px;
+  background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+  box-shadow: var(--shadow); opacity: 0; transform: translateY(8px);
+  transition: opacity .25s ease, transform .25s ease, border-color .4s ease;
+}
+.result.visible { opacity: 1; transform: translateY(0); border-color: rgba(106,169,255,0.35); }
 
 .meta { display: grid; grid-template-columns: 180px 1fr; gap: 16px; align-items: center; }
 .meta img { width: 100%; border-radius: 12px; border: 1px solid var(--border); aspect-ratio: 1 / 1; object-fit: cover; background: #0e1116; box-shadow: 0 8px 20px rgba(0,0,0,0.35); transition: transform .25s ease; }
@@ -100,7 +109,7 @@ input[type="url"]:focus { border-color: var(--accent); box-shadow: 0 0 0 5px rgb
 .meta .author { margin: 0 0 6px; color: var(--muted); }
 .actions { display: flex; gap: 10px; margin-top: 10px; flex-wrap: wrap; }
 
-.downloads { display: flex; gap: 10px; margin-top: 16px; flex-wrap: wrap; }
+.downloads { display: flex; gap: 10px; margin-top: 16px; flex-wrap: wrap; padding-top: 6px; }
 
 .embed { margin-top: 18px; border-radius: 12px; overflow: hidden; }
 

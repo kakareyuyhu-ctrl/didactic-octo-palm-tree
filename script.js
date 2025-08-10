@@ -14,11 +14,17 @@
   const embedEl = document.getElementById('embed');
 
   const dlBest = document.getElementById('dl-best');
+  const dlNwmBtn = document.getElementById('dl-nwm-btn');
+  const dlWmBtn = document.getElementById('dl-wm-btn');
+  const dlAudioBtn = document.getElementById('dl-audio-btn');
   const dlNowm = document.getElementById('dl-nwm');
   const dlWm = document.getElementById('dl-wm');
   const dlAudio = document.getElementById('dl-audio');
 
   let bestDownloadUrl = '';
+  let nowmUrl = '';
+  let wmUrl = '';
+  let audioUrl = '';
   let bestFilenameBase = 'tiktok-video';
 
   function setStatus(message, type = 'info') {
@@ -139,7 +145,11 @@
     const safeBase = (filenameBase || 'tiktok-video').replace(/[^a-z0-9-_]+/gi, '_').slice(0, 100);
     bestFilenameBase = safeBase;
 
-    bestDownloadUrl = nowm || wm || '';
+    nowmUrl = nowm || '';
+    wmUrl = wm || '';
+    audioUrl = audio || '';
+
+    bestDownloadUrl = nowmUrl || wmUrl || '';
     if (bestDownloadUrl) {
       dlBest.classList.remove('hidden');
       dlBest.classList.add('attention');
@@ -148,30 +158,30 @@
       dlBest.classList.remove('attention');
     }
 
-    if (nowm) {
-      dlNowm.classList.remove('hidden');
-      dlNowm.href = nowm;
+    if (nowmUrl) {
+      dlNwmBtn.classList.remove('hidden');
+      dlNowm.href = nowmUrl;
       dlNowm.setAttribute('download', `${safeBase}.mp4`);
     } else {
-      dlNowm.classList.add('hidden');
+      dlNwmBtn.classList.add('hidden');
       dlNowm.removeAttribute('href');
       dlNowm.removeAttribute('download');
     }
-    if (wm) {
-      dlWm.classList.remove('hidden');
-      dlWm.href = wm;
+    if (wmUrl) {
+      dlWmBtn.classList.remove('hidden');
+      dlWm.href = wmUrl;
       dlWm.setAttribute('download', `${safeBase}_wm.mp4`);
     } else {
-      dlWm.classList.add('hidden');
+      dlWmBtn.classList.add('hidden');
       dlWm.removeAttribute('href');
       dlWm.removeAttribute('download');
     }
-    if (audio) {
-      dlAudio.classList.remove('hidden');
-      dlAudio.href = audio;
+    if (audioUrl) {
+      dlAudioBtn.classList.remove('hidden');
+      dlAudio.href = audioUrl;
       dlAudio.setAttribute('download', `${safeBase}.mp3`);
     } else {
-      dlAudio.classList.add('hidden');
+      dlAudioBtn.classList.add('hidden');
       dlAudio.removeAttribute('href');
       dlAudio.removeAttribute('download');
     }
@@ -255,25 +265,40 @@
     }, 0);
   }
 
-  async function quickDownload() {
-    if (!bestDownloadUrl) return;
+  async function autoDownloadUrl(url, filename, fallbackAnchor) {
     try {
-      dlBest.disabled = true;
-      dlBest.textContent = 'Downloading…';
       setStatus('Starting download…', 'loading');
-      const res = await fetch(bestDownloadUrl, { mode: 'cors' }).catch(() => fetch(bestDownloadUrl));
+      const res = await fetch(url, { mode: 'cors' }).catch(() => fetch(url));
       if (!res.ok) throw new Error('download failed');
-      const contentType = res.headers.get('content-type') || 'video/mp4';
       const blob = await res.blob();
-      const ext = contentType.includes('audio') ? 'mp3' : 'mp4';
-      autoDownloadBlob(blob, `${bestFilenameBase}.${ext}`);
+      autoDownloadBlob(blob, filename);
       setStatus('', 'info');
     } catch (e) {
-      setStatus('Direct download blocked by CORS. Use the link buttons instead.', 'error');
-    } finally {
-      dlBest.disabled = false;
-      dlBest.textContent = 'Quick Download';
+      // If blocked by CORS, click the hidden anchor to let browser handle
+      if (fallbackAnchor && fallbackAnchor.href) fallbackAnchor.click();
+      setStatus('Direct download blocked by CORS. Using direct link.', 'info');
     }
+  }
+
+  async function quickDownload() {
+    if (!bestDownloadUrl) return;
+    const ext = bestDownloadUrl.includes('.mp3') ? 'mp3' : 'mp4';
+    await autoDownloadUrl(bestDownloadUrl, `${bestFilenameBase}.${ext}`, dlNowm);
+  }
+
+  async function downloadNowm() {
+    if (!nowmUrl) return;
+    await autoDownloadUrl(nowmUrl, `${bestFilenameBase}.mp4`, dlNowm);
+  }
+
+  async function downloadWm() {
+    if (!wmUrl) return;
+    await autoDownloadUrl(wmUrl, `${bestFilenameBase}_wm.mp4`, dlWm);
+  }
+
+  async function downloadAudio() {
+    if (!audioUrl) return;
+    await autoDownloadUrl(audioUrl, `${bestFilenameBase}.mp3`, dlAudio);
   }
 
   async function handleLookup(event) {
@@ -286,6 +311,9 @@
     durationEl.textContent = '';
     embedEl.innerHTML = '';
     bestDownloadUrl = '';
+    nowmUrl = '';
+    wmUrl = '';
+    audioUrl = '';
     setDownloads({ nowm: '', wm: '', audio: '', filenameBase: '' });
 
     setStatus('Fetching details…', 'loading');
@@ -297,55 +325,43 @@
       return;
     }
 
-    // Start canonical resolution and oEmbed immediately in parallel
+    // Start canonical resolution and oEmbed immediately; also prefetch reader for meta
     const canonicalPromise = resolveCanonicalIfShort(normalized);
     const oembedPromise = fetchOEmbed(normalized).catch(() => null);
     const readerPromise = fetchViaReader(normalized).catch(() => '');
 
     const targetUrl = await canonicalPromise.catch(() => normalized);
 
-    // In parallel: attempt TikWM and Tikmate
+    // Race TikWM and Tikmate
     const tikwmP = fetchTikwm(targetUrl).catch(() => null);
     const tikmateP = fetchTikmate(targetUrl).catch(() => null);
-
-    let primary = await tikwmP;
-    if (primary) {
-      applyTikwmData(targetUrl, primary);
+    const first = await Promise.race([tikwmP, tikmateP]);
+    if (first && first.videoUrl) {
+      applyTikmateData(targetUrl, first, new URL(targetUrl).pathname.split('/').pop());
+    } else if (first) {
+      applyTikwmData(targetUrl, first);
     } else {
-      const fallback = await tikmateP;
-      if (fallback) {
-        applyTikmateData(targetUrl, fallback, new URL(targetUrl).pathname.split('/').pop());
-      }
+      // fallback: await both then apply whichever worked
+      const [tw, tm] = await Promise.all([tikwmP, tikmateP]);
+      if (tw) applyTikwmData(targetUrl, tw);
+      else if (tm) applyTikmateData(targetUrl, tm, new URL(targetUrl).pathname.split('/').pop());
     }
 
-    // Fill in details from whichever returns first
+    // Fill details
     const oembed = await oembedPromise;
     if (oembed) renderFromOEmbed(targetUrl, oembed);
     else {
       const html = await readerPromise;
-      if (html) {
-        const meta = extractMetaFromHtml(html);
-        renderMetaBasics(targetUrl, meta);
-      }
+      if (html) renderMetaBasics(targetUrl, extractMetaFromHtml(html));
     }
 
-    if (bestDownloadUrl) {
+    if (nowmUrl || wmUrl || audioUrl) {
       showResult(true);
       dlBest.classList.add('attention');
       setStatus('', 'info');
       input.blur();
     } else {
-      // As a last attempt, if we failed both, try second API if not tried already
-      if (!primary) {
-        const retry = await tikmateP;
-        if (retry) applyTikmateData(targetUrl, retry, new URL(targetUrl).pathname.split('/').pop());
-      }
-      if (bestDownloadUrl) {
-        showResult(true);
-        setStatus('', 'info');
-      } else {
-        setStatus('Could not fetch details. Please verify the link is public and try again.', 'error');
-      }
+      setStatus('Could not fetch details. Please verify the link is public and try again.', 'error');
     }
   }
 
@@ -362,4 +378,7 @@
   form.addEventListener('submit', handleLookup);
   copyBtn.addEventListener('click', handleCopy);
   dlBest.addEventListener('click', quickDownload);
+  dlNwmBtn.addEventListener('click', downloadNowm);
+  dlWmBtn.addEventListener('click', downloadWm);
+  dlAudioBtn.addEventListener('click', downloadAudio);
 })();

@@ -48,10 +48,13 @@
       </div>
 
       <div class="downloads">
-        <button id="dl-best" class="btn success hidden" type="button">Quick Download</button>
-        <a id="dl-nwm" class="btn success hidden" rel="noopener noreferrer">Download (No watermark)</a>
-        <a id="dl-wm" class="btn secondary hidden" rel="noopener noreferrer">Download (Watermark)</a>
-        <a id="dl-audio" class="btn secondary hidden" rel="noopener noreferrer">Download MP3</a>
+        <button id="dl-best" class="btn success hidden" type="button" aria-label="Quick download best quality">Quick Download</button>
+        <button id="dl-nwm-btn" class="btn success hidden" type="button" aria-label="Download no watermark">No watermark</button>
+        <button id="dl-wm-btn" class="btn secondary hidden" type="button" aria-label="Download with watermark">Watermark</button>
+        <button id="dl-audio-btn" class="btn secondary hidden" type="button" aria-label="Download MP3">MP3</button>
+        <a id="dl-nwm" class="hidden" rel="noopener noreferrer">nwm</a>
+        <a id="dl-wm" class="hidden" rel="noopener noreferrer">wm</a>
+        <a id="dl-audio" class="hidden" rel="noopener noreferrer">mp3</a>
       </div>
 
       <div id="embed" class="embed"></div>
