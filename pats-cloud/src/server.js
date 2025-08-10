@@ -11,7 +11,7 @@ import crypto from 'crypto';
 import rateLimit from 'express-rate-limit';
 import { execFile } from 'child_process';
 import mime from 'mime-types';
-import { isCloudConfigured, uploadFileToCloud, getTeraboxConfig, setTeraboxConfig } from './cloud.js';
+import { isCloudConfigured, uploadFileToCloud, getTeraboxConfig, setTeraboxConfig, getTeraboxAuthUrl, handleTeraboxOAuthCallback } from './cloud.js';
 
 dotenv.config();
 
@@ -403,6 +403,23 @@ app.post('/api/cloud/terabox', requireAuth, express.json(), (req, res) => {
   if (!ndus || !appId) return res.status(400).json({ error: 'Missing fields' });
   setTeraboxConfig({ ndus, appId, dir, uploadId });
   res.json({ ok: true });
+});
+
+app.get('/api/cloud/terabox/oauth/url', requireAuth, (_req, res) => {
+  const url = getTeraboxAuthUrl();
+  if (!url) return res.status(400).json({ error: 'OAuth not configured' });
+  res.json({ url });
+});
+
+app.get('/api/cloud/terabox/oauth/callback', requireAuth, async (req, res) => {
+  try {
+    const code = String(req.query.code || '');
+    if (!code) return res.status(400).json({ error: 'Missing code' });
+    await handleTeraboxOAuthCallback(code);
+    res.json({ ok: true });
+  } catch (e) {
+    res.status(500).json({ error: 'OAuth failed' });
+  }
 });
 
 app.delete('/api/upload/abort/:uploadId', requireAuth, async (req, res) => {
