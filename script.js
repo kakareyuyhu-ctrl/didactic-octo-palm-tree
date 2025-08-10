@@ -19,11 +19,17 @@
 
   function setStatus(message, type = 'info') {
     statusEl.textContent = message || '';
-    statusEl.style.color = type === 'error' ? 'var(--danger)' : 'var(--muted)';
+    statusEl.setAttribute('data-state', type === 'error' ? 'error' : (type === 'loading' ? 'loading' : '')); 
   }
 
   function showResult(show) {
-    resultEl.classList.toggle('hidden', !show);
+    if (show) {
+      resultEl.hidden = false;
+      resultEl.classList.add('visible');
+    } else {
+      resultEl.classList.remove('visible');
+      resultEl.hidden = true;
+    }
   }
 
   function sanitizeText(value) {
@@ -159,9 +165,9 @@
 
   function renderFromOEmbed(targetUrl, data) {
     const { title, author_name, thumbnail_url, html } = data;
-    if (thumbnail_url) thumbEl.src = thumbnail_url;
-    if (title) titleEl.innerHTML = sanitizeText(title);
-    if (author_name) authorEl.innerHTML = sanitizeText(`@${author_name}`);
+    if (thumbnail_url && !thumbEl.src) thumbEl.src = thumbnail_url;
+    if (title && !titleEl.textContent) titleEl.innerHTML = sanitizeText(title);
+    if (author_name && !authorEl.textContent) authorEl.innerHTML = sanitizeText(`@${author_name}`);
     canonicalWrapEl.textContent = targetUrl;
     openBtn.href = targetUrl;
 
@@ -178,15 +184,14 @@
 
   function renderMetaBasics(targetUrl, meta) {
     const { title, image, author } = meta || {};
-    if (image) thumbEl.src = image;
-    if (title) titleEl.innerHTML = sanitizeText(title);
-    if (author) authorEl.innerHTML = sanitizeText(`@${author}`);
+    if (image && !thumbEl.src) thumbEl.src = image;
+    if (title && !titleEl.textContent) titleEl.innerHTML = sanitizeText(title);
+    if (author && !authorEl.textContent) authorEl.innerHTML = sanitizeText(`@${author}`);
     canonicalWrapEl.textContent = targetUrl;
     openBtn.href = targetUrl;
   }
 
   function applyTikwmData(targetUrl, data) {
-    // Data shape: https://www.tikwm.com
     const title = data.title || '';
     const author = data.author?.unique_id || data.author?.nickname || '';
     const thumb = data.cover || data.origin_cover || data.dynamic_cover || '';
@@ -226,7 +231,16 @@
   async function handleLookup(event) {
     event.preventDefault();
     showResult(false);
-    setStatus('Fetching details…');
+    // Reset fields
+    thumbEl.removeAttribute('src');
+    titleEl.textContent = '';
+    authorEl.textContent = '';
+    canonicalWrapEl.textContent = '';
+    durationEl.textContent = '';
+    embedEl.innerHTML = '';
+    setDownloads({ nowm: '', wm: '', audio: '', filenameBase: '' });
+
+    setStatus('Fetching details…', 'loading');
 
     const raw = input.value;
     const normalized = normalizeTikTokUrl(raw);
@@ -235,13 +249,10 @@
       return;
     }
 
-    // Resolve shortlinks early
     const targetUrl = await resolveCanonicalIfShort(normalized);
 
-    // Kick off oEmbed in background for rich details
     const oembedPromise = fetchOEmbed(targetUrl).catch(() => null);
 
-    // Primary: TikWM
     let success = false;
     try {
       const data = await fetchTikwm(targetUrl);
@@ -249,7 +260,6 @@
       success = true;
     } catch (_) {}
 
-    // Fallback: Tikmate
     if (!success) {
       try {
         const d2 = await fetchTikmate(targetUrl);
@@ -258,7 +268,6 @@
       } catch (_) {}
     }
 
-    // Always try to fill details/embeds if possible
     try {
       const o = await oembedPromise;
       if (o) renderFromOEmbed(targetUrl, o);
@@ -266,17 +275,17 @@
 
     if (success) {
       showResult(true);
-      setStatus('');
+      setStatus('', 'info');
+      input.blur();
       return;
     }
 
-    // Last resort: show only basic meta
     try {
       const html = await fetchViaReader(targetUrl);
       const meta = extractMetaFromHtml(html);
       renderMetaBasics(targetUrl, meta);
       showResult(true);
-      setStatus('Could not get direct download, but showed available details.');
+      setStatus('Could not get direct download, but showed available details.', 'info');
     } catch (_) {
       setStatus('Could not fetch details. Please verify the link is public and try again.', 'error');
     }

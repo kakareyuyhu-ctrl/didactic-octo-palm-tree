@@ -3,25 +3,26 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>TikTok Video Info Viewer</title>
+  <title>TikTok Downloader</title>
   <link rel="stylesheet" href="./style.css" />
-  <meta name="description" content="View TikTok video details and embed from any TikTok URL." />
+  <meta name="description" content="Download TikTok videos (no key) and view details from any TikTok URL." />
+  <script>document.addEventListener('DOMContentLoaded',()=>document.body.classList.add('ready'))</script>
 </head>
 <body>
   <main class="container">
-    <h1>TikTok Video Info</h1>
+    <h1>TikTok Downloader</h1>
     <form id="lookup-form" autocomplete="off" novalidate>
       <label for="url-input">Paste TikTok URL</label>
       <div class="input-row">
-        <input id="url-input" type="url" inputmode="url" placeholder="https://www.tiktok.com/@user/video/123456789" required />
-        <button type="submit" class="btn">Fetch</button>
+        <input id="url-input" type="url" inputmode="url" placeholder="https://www.tiktok.com/@user/video/123456789" required aria-required="true" />
+        <button type="submit" class="btn" aria-label="Fetch video details">Fetch</button>
       </div>
       <p class="help">Works with: <span class="mono">tiktok.com</span>, <span class="mono">m.tiktok.com</span>, <span class="mono">vm.tiktok.com</span>, <span class="mono">vt.tiktok.com</span>.</p>
     </form>
 
     <section id="status" class="status" role="status" aria-live="polite"></section>
 
-    <section id="result" class="result hidden">
+    <section id="result" class="result" aria-labelledby="title" hidden>
       <div class="meta">
         <img id="thumb" alt="Video thumbnail" />
         <div class="info">
@@ -46,7 +47,7 @@
     </section>
 
     <footer class="foot">
-      <p>Respect creators' rights. Only view and share content you have permission to use.</p>
+      <p>Respect creators' rights. Only download content you have permission to use.</p>
     </footer>
   </main>
 
