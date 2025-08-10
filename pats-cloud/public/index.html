@@ -76,7 +76,16 @@
     }
     .file .meta { display: flex; gap: 10px; align-items: center; min-width: 0; }
     .file .meta > * { line-height: 1.2; vertical-align: middle; }
-    .file .name { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .file .name {
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      word-break: break-word;
+      max-width: 100%;
+    }
+    .file .name .ext { color: var(--muted); }
     .file .actions { display: flex; gap: 6px; align-items: center; }
 
     .upload-item { padding: 10px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1); background: var(--surface-2); }
@@ -89,6 +98,12 @@
 
     @media (hover: hover) {
       .file:hover { border-color: rgba(255,255,255,0.22); }
+    }
+
+    @media (max-width: 480px) {
+      header h1 { font-size: 18px; }
+      .btn { padding: 10px 12px; font-size: 13px; }
+      .file .meta { gap: 6px; }
     }
   </style>
 </head>
@@ -237,12 +252,15 @@
       for (const f of currentFiles) {
         const li = document.createElement('li');
         li.className = 'file';
-        const kb = Math.max(1, Math.round(f.size / 1024));
+        const sizeLabel = formatBytes(f.size);
         const date = new Date(f.modifiedAt).toLocaleString();
+        const dot = f.name.lastIndexOf('.');
+        const base = dot > 0 ? f.name.slice(0, dot) : f.name;
+        const ext = dot > 0 ? f.name.slice(dot) : '';
         li.innerHTML = `
           <div class="meta">
-            <div class="name">${f.name}</div>
-            <div class="muted">${kb} KB</div>
+            <div class="name" title="${f.name}"><span class="base">${base}</span><span class="ext">${ext}</span></div>
+            <div class="muted">${sizeLabel}</div>
             <div class="muted">•</div>
             <div class="muted">${date}</div>
           </div>
@@ -323,9 +341,12 @@
       const totalChunks = Math.ceil(file.size / chunkSize);
       const li = document.createElement('li');
       li.className = 'upload-item';
+      const dotUp = file.name.lastIndexOf('.')
+      const baseUp = dotUp > 0 ? file.name.slice(0, dotUp) : file.name
+      const extUp = dotUp > 0 ? file.name.slice(dotUp) : ''
       li.innerHTML = `
         <div class="row" style="justify-content:space-between; gap:10px; align-items:center">
-          <div class="name" style="flex:1; min-width:0">${file.name}</div>
+          <div class="name" style="flex:1; min-width:0" title="${file.name}"><span class="base">${baseUp}</span><span class="ext">${extUp}</span></div>
           <div class="small">${formatBytes(file.size)}</div>
         </div>
         <div class="progress" style="margin-top:8px"><div></div></div>
