@@ -66,3 +66,10 @@ Pats Cloud running on http://localhost:3000
 [0mGET /api/storage [32m200[0m 5.720 ms - 81[0m
 [0mGET /api/storage [32m200[0m 3.399 ms - 81[0m
 [0mGET /api/storage [32m200[0m 3.277 ms - 81[0m
+[0mGET /api/storage [32m200[0m 1.510 ms - 81[0m
+[0mGET /api/storage [32m200[0m 2.351 ms - 81[0m
+[0mGET /api/storage [36m304[0m 1.966 ms - -[0m
+[0mGET /file/com-f1player-1130501-56198158-773497235cbdfceba8b312dc85a627c5.apk?folder=My_Folder_1 [32m206[0m 4.448 ms - 238421269[0m
+[0mGET /file/com-f1player-1130501-56198158-773497235cbdfceba8b312dc85a627c5.apk?folder=My_Folder_1 [32m206[0m 2.446 ms - 238421270[0m
+[0mGET /file/com-f1player-1130501-56198158-773497235cbdfceba8b312dc85a627c5.apk?folder=My_Folder_1 [32m206[0m 1.492 ms - 238421269[0m
+[0mGET /file/com-f1player-1130501-56198158-773497235cbdfceba8b312dc85a627c5.apk?folder=My_Folder_1 [32m206[0m 2.524 ms - 238421270[0m
