@@ -7,7 +7,7 @@ const provider = (process.env.CLOUD_PROVIDER || '').toLowerCase();
 
 let uploader = null;
 let currentProvider = provider;
-let teraboxCreds = null; // { ndus, appId, uploadId, dir }
+let teraboxCreds = null; // { ndus, appId, dir }
 
 const CONFIG_PATH = path.resolve(path.dirname(new URL(import.meta.url).pathname), '..', 'cloud.json');
 
@@ -15,9 +15,9 @@ function loadPersisted() {
   try {
     const raw = fs.readFileSync(CONFIG_PATH, 'utf8');
     const cfg = JSON.parse(raw);
-    if (cfg && cfg.terabox && cfg.terabox.ndus && cfg.terabox.appId && cfg.terabox.uploadId) {
+    if (cfg && cfg.terabox && cfg.terabox.ndus && cfg.terabox.appId) {
       currentProvider = 'terabox';
-      teraboxCreds = { ndus: cfg.terabox.ndus, appId: cfg.terabox.appId, uploadId: cfg.terabox.uploadId, dir: cfg.terabox.dir || '/' };
+      teraboxCreds = { ndus: cfg.terabox.ndus, appId: cfg.terabox.appId, dir: cfg.terabox.dir || '/' };
     }
   } catch {}
 }
@@ -44,10 +44,9 @@ if (provider === 's3') {
 } else if (provider === 'terabox' && !teraboxCreds) {
   const ndus = process.env.TERA_NDUS || '';
   const appId = process.env.TERA_APP_ID || '';
-  const uploadId = process.env.TERA_UPLOAD_ID || '';
   const dir = process.env.TERA_DIR || '/';
-  if (ndus && appId && uploadId) {
-    teraboxCreds = { ndus, appId, uploadId, dir };
+  if (ndus && appId) {
+    teraboxCreds = { ndus, appId, dir };
     currentProvider = 'terabox';
   }
 }
@@ -67,7 +66,7 @@ export async function uploadFileToCloud(filePath, key, contentType) {
   if (currentProvider === 'terabox') {
     if (!teraboxCreds) throw new Error('Cloud not configured');
     const TeraboxUploader = (await import('terabox-upload-tool')).default || (await import('terabox-upload-tool'));
-    const client = new TeraboxUploader({ ndus: teraboxCreds.ndus, appId: teraboxCreds.appId, uploadId: teraboxCreds.uploadId });
+    const client = new TeraboxUploader({ ndus: teraboxCreds.ndus, appId: teraboxCreds.appId });
     const targetDirectory = teraboxCreds.dir || '/';
     await client.uploadFile(filePath, () => {}, targetDirectory);
     return;
@@ -81,9 +80,9 @@ export function getTeraboxConfig() {
   return { enabled: has, dir: teraboxCreds?.dir || '/', appId: teraboxCreds?.appId || '' };
 }
 
-export function setTeraboxConfig({ ndus, appId, uploadId, dir }) {
+export function setTeraboxConfig({ ndus, appId, dir }) {
   currentProvider = 'terabox';
-  teraboxCreds = { ndus, appId, uploadId, dir: dir || '/' };
+  teraboxCreds = { ndus, appId, dir: dir || '/' };
   try {
     const out = { terabox: teraboxCreds };
     fs.writeFileSync(CONFIG_PATH, JSON.stringify(out, null, 2));
