@@ -21,3 +21,5 @@
 2025-08-10T20:21:52Z INF Tunnel connection curve preferences: [X25519MLKEM768 CurveP256] connIndex=0 event=0 ip=198.41.200.53
 2025/08/10 20:21:52 failed to sufficiently increase receive buffer size (was: 208 kiB, wanted: 7168 kiB, got: 416 kiB). See https://github.com/quic-go/quic-go/wiki/UDP-Buffer-Sizes for details.
 2025-08-10T20:21:52Z INF Registered tunnel connection connIndex=0 connection=0e5caf7b-27f5-4fd5-97c2-871fcf80bd65 event=0 ip=198.41.200.53 location=iad05 protocol=quic
+2025-08-10T20:33:55Z ERR  error="stream 357 canceled by remote with error code 0" connIndex=0 event=1 ingressRule=0 originService=http://127.0.0.1:3000
+2025-08-10T20:33:55Z ERR Request failed error="stream 357 canceled by remote with error code 0" connIndex=0 dest=https://mumbai-tabs-portion-hardware.trycloudflare.com/download/1754858023790_Winlator_10.1.apk event=0 ip=198.41.200.53 type=http
