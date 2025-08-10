@@ -118,6 +118,11 @@
           <span>Choose files</span>
         </label>
         <div class="spacer"></div>
+        <div class="row" id="tabs" style="gap:6px">
+          <button class="btn secondary" data-sort="recent">Recent</button>
+          <button class="btn secondary" data-sort="name">Name</button>
+          <button class="btn secondary" data-sort="size">Size</button>
+        </div>
         <button id="refreshBtn" class="btn secondary">Refresh</button>
       </div>
 
@@ -145,8 +150,11 @@
     const drop = document.getElementById('drop');
     const refreshBtn = document.getElementById('refreshBtn');
     const uploadsList = document.getElementById('uploads');
+    const tabs = document.getElementById('tabs');
 
     let authed = false;
+    let currentSort = 'recent';
+    let currentFiles = [];
 
     async function api(path, opts = {}) {
       const res = await fetch(path, {
@@ -213,12 +221,20 @@
     }
 
     function renderFiles(files) {
-      if (!files.length) {
+      currentFiles = files.slice();
+      if (currentSort === 'name') {
+        currentFiles.sort((a,b) => a.name.localeCompare(b.name));
+      } else if (currentSort === 'size') {
+        currentFiles.sort((a,b) => b.size - a.size);
+      } else {
+        currentFiles.sort((a,b) => b.modifiedAt - a.modifiedAt);
+      }
+      if (!currentFiles.length) {
         fileList.innerHTML = '<li class="muted">No files yet</li>';
         return;
       }
       fileList.innerHTML = '';
-      for (const f of files) {
+      for (const f of currentFiles) {
         const li = document.createElement('li');
         li.className = 'file';
         const kb = Math.max(1, Math.round(f.size / 1024));
@@ -231,17 +247,60 @@
             <div class="muted">${date}</div>
           </div>
           <div class="actions">
-            <a class="btn secondary" href="/download/${encodeURIComponent(f.name)}">Download</a>
+            <button class="btn secondary" data-dl="${encodeURIComponent(f.name)}">Boost DL</button>
             <button class="btn danger">Delete</button>
           </div>
         `;
-        li.querySelector('button').addEventListener('click', async () => {
+        li.querySelector('.btn.danger').addEventListener('click', async () => {
           if (!confirm('Delete this file?')) return;
           const res = await fetch(`/api/files/${encodeURIComponent(f.name)}`, { method: 'DELETE' });
           if (!res.ok) { alert('Failed to delete'); return; }
           await loadFiles();
         });
+        li.querySelector('[data-dl]')?.addEventListener('click', () => acceleratedDownload(f.name, f.size));
         fileList.appendChild(li);
+      }
+    }
+    tabs.addEventListener('click', (e) => {
+      const btn = e.target.closest('button[data-sort]');
+      if (!btn) return;
+      currentSort = btn.dataset.sort;
+      renderFiles(currentFiles);
+    });
+
+    async function acceleratedDownload(fileName, fileSize) {
+      try {
+        const url = `/file/${encodeURIComponent(fileName)}`;
+        const parallel = 4;
+        const chunkSize = Math.ceil(fileSize / parallel);
+        const ranges = Array.from({ length: parallel }, (_, i) => ({
+          start: i * chunkSize,
+          end: Math.min(fileSize - 1, (i + 1) * chunkSize - 1),
+        })).filter(r => r.start <= r.end);
+
+        const parts = await Promise.all(ranges.map(async (r) => {
+          const res = await fetch(url, { headers: { Range: `bytes=${r.start}-${r.end}` }, credentials: 'same-origin' });
+          if (!res.ok && res.status !== 206) throw new Error('range fetch failed');
+          const buf = await res.arrayBuffer();
+          return { start: r.start, buf };
+        }));
+        parts.sort((a,b) => a.start - b.start);
+        const total = parts.reduce((n,p) => n + p.buf.byteLength, 0);
+        const out = new Uint8Array(total);
+        let offset = 0;
+        for (const p of parts) { out.set(new Uint8Array(p.buf), offset); offset += p.buf.byteLength; }
+
+        const blob = new Blob([out]);
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = fileName;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        URL.revokeObjectURL(a.href);
+      } catch (e) {
+        // fallback
+        location.href = `/download/${encodeURIComponent(fileName)}`;
       }
     }
 

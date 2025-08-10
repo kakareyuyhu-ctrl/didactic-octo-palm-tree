@@ -10,6 +10,7 @@ import dotenv from 'dotenv';
 import crypto from 'crypto';
 import rateLimit from 'express-rate-limit';
 import { execFile } from 'child_process';
+import mime from 'mime-types';
 
 dotenv.config();
 
@@ -172,6 +173,49 @@ app.get('/download/:name', requireAuth, async (req, res) => {
     return res.status(404).json({ error: 'Not found' });
   }
   res.download(filePath, name);
+});
+
+// Range-enabled file streaming for accelerated downloads
+app.get('/file/:name', requireAuth, async (req, res) => {
+  try {
+    const name = path.basename(req.params.name);
+    const filePath = path.join(UPLOAD_DIR, name);
+    if (!filePath.startsWith(UPLOAD_DIR)) return res.status(400).json({ error: 'Invalid path' });
+    const stat = await fs.promises.stat(filePath).catch(() => null);
+    if (!stat || !stat.isFile()) return res.status(404).json({ error: 'Not found' });
+    const fileSize = stat.size;
+    const contentType = mime.lookup(name) || 'application/octet-stream';
+    res.setHeader('Accept-Ranges', 'bytes');
+    res.setHeader('Content-Type', contentType);
+    res.setHeader('Cache-Control', 'no-store');
+
+    const range = req.headers.range;
+    if (range) {
+      const m = /bytes=(\d*)-(\d*)/.exec(range);
+      let start = 0;
+      let end = fileSize - 1;
+      if (m) {
+        if (m[1] !== '') start = parseInt(m[1], 10);
+        if (m[2] !== '') end = parseInt(m[2], 10);
+      }
+      if (isNaN(start) || isNaN(end) || start > end || start >= fileSize) {
+        res.status(416).setHeader('Content-Range', `bytes */${fileSize}`);
+        return res.end();
+      }
+      const chunkSize = end - start + 1;
+      res.status(206);
+      res.setHeader('Content-Range', `bytes ${start}-${end}/${fileSize}`);
+      res.setHeader('Content-Length', `${chunkSize}`);
+      const stream = fs.createReadStream(filePath, { start, end });
+      stream.pipe(res);
+    } else {
+      res.setHeader('Content-Length', `${fileSize}`);
+      const stream = fs.createReadStream(filePath);
+      stream.pipe(res);
+    }
+  } catch (e) {
+    res.status(500).json({ error: 'stream error' });
+  }
 });
 
 app.delete('/api/files/:name', requireAuth, async (req, res) => {
