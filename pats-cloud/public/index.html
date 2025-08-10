@@ -147,6 +147,22 @@
         <button id="refreshBtn" class="btn secondary">Refresh</button>
       </div>
 
+      <div id="teraBoxCard" class="card" style="margin-top:10px; padding:12px; display:none">
+        <div class="row" style="justify-content:space-between; align-items:center">
+          <div>
+            <div style="font-weight:600">Connect TeraBox (one-time)</div>
+            <div class="small">Paste ndus/appId/uploadId once. We store securely on the server so mirroring is automatic.</div>
+          </div>
+        </div>
+        <div class="row" style="gap:8px; margin-top:8px; flex-wrap:wrap">
+          <input id="tbNdus" class="file-input" type="text" placeholder="ndus" style="flex:1; min-width:200px" />
+          <input id="tbAppId" class="file-input" type="text" placeholder="appId (e.g., 250528)" style="width:200px" />
+          <input id="tbUploadId" class="file-input" type="text" placeholder="uploadId" style="flex:1; min-width:240px" />
+          <input id="tbDir" class="file-input" type="text" placeholder="dir (e.g., /)" style="width:160px" value="/" />
+          <button id="tbSave" class="btn">Save</button>
+        </div>
+      </div>
+
       <div id="drop" class="file-drop" style="margin-top:10px">Drop files here to upload</div>
 
       <ul id="fileList" class="files" style="margin-top:12px"></ul>
@@ -174,6 +190,12 @@
     const tabs = document.getElementById('tabs');
     const folderSelect = document.getElementById('folderSelect');
     const createFolderBtn = document.getElementById('createFolderBtn');
+    const teraBoxCard = document.getElementById('teraBoxCard');
+    const tbNdus = document.getElementById('tbNdus');
+    const tbAppId = document.getElementById('tbAppId');
+    const tbUploadId = document.getElementById('tbUploadId');
+    const tbDir = document.getElementById('tbDir');
+    const tbSave = document.getElementById('tbSave');
 
     let authed = false;
     let currentSort = 'recent';
@@ -200,6 +222,7 @@
       logoutBtn.classList.toggle('hidden', !v);
       statusEl.textContent = v ? 'Signed in' : 'Not signed in';
       if (v) loadStorage(); else storageEl.textContent = '';
+      if (v) checkCloudStatus();
     }
 
     loginBtn.addEventListener('click', async () => {
@@ -242,6 +265,20 @@
         }
       } catch {
         storageEl.textContent = '';
+      }
+    }
+
+    async function checkCloudStatus() {
+      try {
+        const st = await api('/api/cloud/status');
+        if (st && st.enabled) {
+          teraBoxCard.style.display = 'none';
+        } else {
+          // Show one-time connect UI
+          teraBoxCard.style.display = '';
+        }
+      } catch {
+        teraBoxCard.style.display = '';
       }
     }
 
@@ -382,6 +419,27 @@
       while (v >= 1024 && i < units.length - 1) { v /= 1024; i++; }
       return `${v.toFixed(v >= 100 ? 0 : v >= 10 ? 1 : 2)} ${units[i]}`;
     }
+
+    tbSave?.addEventListener('click', async () => {
+      try {
+        const ndus = tbNdus.value.trim();
+        const appId = tbAppId.value.trim();
+        const uploadId = tbUploadId.value.trim();
+        const dir = tbDir.value.trim() || '/';
+        if (!ndus || !appId || !uploadId) { alert('Fill ndus, appId, uploadId'); return; }
+        const res = await fetch('/api/cloud/terabox', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'same-origin',
+          body: JSON.stringify({ ndus, appId, uploadId, dir })
+        });
+        if (!res.ok) throw new Error('Failed to save');
+        teraBoxCard.style.display = 'none';
+        alert('TeraBox connected. New uploads will mirror automatically.');
+      } catch {
+        alert('Failed to connect TeraBox');
+      }
+    });
 
     async function uploadFiles(files) {
       if (!files?.length) return;
