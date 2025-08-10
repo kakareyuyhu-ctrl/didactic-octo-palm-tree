@@ -89,3 +89,14 @@ Pats Cloud running on http://localhost:3000
 [0mGET /api/folders [36m304[0m 1.237 ms - -[0m
 [0mGET /api/cloud/status [36m304[0m 0.389 ms - -[0m
 [0mGET /api/storage [36m304[0m 2.049 ms - -[0m
+[0mGET /api/storage [32m200[0m 2.173 ms - 81[0m
+[0mGET /api/storage [32m200[0m 2.013 ms - 81[0m
+[0mGET / [36m304[0m 1.030 ms - -[0m
+[0mGET /api/files [36m304[0m 0.958 ms - -[0m
+[0mGET /api/storage [32m200[0m 2.209 ms - 81[0m
+[0mGET /api/storage [36m304[0m 1.031 ms - -[0m
+[0mGET /api/cloud/status [36m304[0m 0.294 ms - -[0m
+[0mGET /api/folders [36m304[0m 0.486 ms - -[0m
+[0mGET /api/storage [32m200[0m 1.866 ms - 81[0m
+[0mPOST /api/cloud/terabox [32m200[0m 0.685 ms - 11[0m
+[0mGET /api/storage [32m200[0m 2.412 ms - 81[0m
