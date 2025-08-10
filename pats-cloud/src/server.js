@@ -11,8 +11,12 @@ import crypto from 'crypto';
 import rateLimit from 'express-rate-limit';
 import { execFile } from 'child_process';
 import mime from 'mime-types';
+import { isCloudConfigured, uploadStreamToCloud } from './cloud.js';
 
 dotenv.config();
+
+const enableCloudMirror = (process.env.CLOUD_MIRROR || 'false').toLowerCase() === 'true';
+const cloudPrefix = process.env.CLOUD_PREFIX || '';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -348,10 +352,20 @@ app.post('/api/upload/complete', requireAuth, limiter, express.json(), async (re
     await fs.promises.rmdir(dir);
 
     const stat = await fs.promises.stat(outPath);
-    res.json({ ok: true, file: { name: path.basename(outPath), size: stat.size } });
+    // Background cloud mirror
+    if (enableCloudMirror && isCloudConfigured()) {
+      const key = path.posix.join(cloudPrefix, (meta.folder || ''), path.basename(outPath)).replace(/\\/g, '/');
+      const stream = fs.createReadStream(outPath);
+      uploadStreamToCloud(stream, key, mime.lookup(outPath) || 'application/octet-stream').catch(() => {});
+    }
+    res.json({ ok: true, file: { name: path.basename(outPath), size: stat.size }, mirrored: enableCloudMirror && isCloudConfigured() });
   } catch (e) {
     res.status(500).json({ error: 'Failed to complete upload' });
   }
+});
+
+app.get('/api/cloud/status', requireAuth, (_req, res) => {
+  res.json({ enabled: enableCloudMirror && isCloudConfigured() });
 });
 
 app.delete('/api/upload/abort/:uploadId', requireAuth, async (req, res) => {
