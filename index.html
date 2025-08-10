@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>TikTok Video Info Viewer</title>
+  <link rel="stylesheet" href="./style.css" />
+  <meta name="description" content="View TikTok video details and embed from any TikTok URL." />
+</head>
+<body>
+  <main class="container">
+    <h1>TikTok Video Info</h1>
+    <form id="lookup-form" autocomplete="off" novalidate>
+      <label for="url-input">Paste TikTok URL</label>
+      <div class="input-row">
+        <input id="url-input" type="url" inputmode="url" placeholder="https://www.tiktok.com/@user/video/123456789" required />
+        <button type="submit" class="btn">Fetch</button>
+      </div>
+      <p class="help">Works with: <span class="mono">tiktok.com</span>, <span class="mono">m.tiktok.com</span>, <span class="mono">vm.tiktok.com</span>, <span class="mono">vt.tiktok.com</span>.</p>
+    </form>
+
+    <section id="status" class="status" role="status" aria-live="polite"></section>
+
+    <section id="result" class="result hidden">
+      <div class="meta">
+        <img id="thumb" alt="Video thumbnail" />
+        <div class="info">
+          <h2 id="title" class="title"></h2>
+          <p id="author" class="author"></p>
+          <p id="canonical-wrap" class="mono small"></p>
+          <p id="duration" class="small"></p>
+          <div class="actions">
+            <a id="open-btn" target="_blank" rel="noopener noreferrer" class="btn">Open video</a>
+            <button id="copy-btn" type="button" class="btn secondary">Copy share link</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="downloads">
+        <a id="dl-nwm" class="btn success hidden" target="_blank" rel="noopener noreferrer">Download (No watermark)</a>
+        <a id="dl-wm" class="btn secondary hidden" target="_blank" rel="noopener noreferrer">Download (Watermark)</a>
+        <a id="dl-audio" class="btn secondary hidden" target="_blank" rel="noopener noreferrer">Download MP3</a>
+      </div>
+
+      <div id="embed" class="embed"></div>
+    </section>
+
+    <footer class="foot">
+      <p>Respect creators' rights. Only view and share content you have permission to use.</p>
+    </footer>
+  </main>
+
+  <script src="./script.js" defer></script>
+</body>
+</html>
