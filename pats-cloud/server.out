@@ -103,3 +103,15 @@ ValidationError: The 'X-Forwarded-For' header is set but the Express 'trust prox
 [0mGET /api/storage [32m200[0m 0.731 ms - 80[0m
 [0mGET /api/storage [32m200[0m 1.444 ms - 80[0m
 [0mGET /api/storage [32m200[0m 1.618 ms - 80[0m
+[0mPOST /api/upload [32m200[0m 9526.496 ms - 119[0m
+[0mGET /api/storage [32m200[0m 2.012 ms - 81[0m
+[0mGET /api/files [32m200[0m 0.927 ms - 338[0m
+[0mGET /api/storage [36m304[0m 1.699 ms - -[0m
+[0mGET /api/storage [32m200[0m 1.853 ms - 81[0m
+[0mGET /api/storage [32m200[0m 1.456 ms - 81[0m
+[0mGET /api/storage [32m200[0m 1.390 ms - 81[0m
+[0mGET /api/files [36m304[0m 1.413 ms - -[0m
+[0mGET /api/storage [32m200[0m 1.707 ms - 81[0m
+[0mGET /api/storage [32m200[0m 2.198 ms - 81[0m
+[0mGET /api/storage [32m200[0m 2.126 ms - 81[0m
+[0mGET /api/storage [32m200[0m 1.837 ms - 81[0m

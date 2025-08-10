@@ -134,6 +134,10 @@
           <input id="fileInput" type="file" multiple style="display:none" />
           <span>Choose files</span>
         </label>
+        <select id="folderSelect" class="btn secondary" style="background: var(--surface); border: 1px solid rgba(255,255,255,0.14); color: var(--text);">
+          <option value="">/ (root)</option>
+        </select>
+        <button id="createFolderBtn" class="btn secondary">+ Folder</button>
         <div class="spacer"></div>
         <div class="row" id="tabs" style="gap:6px">
           <button class="btn secondary" data-sort="recent">Recent</button>
@@ -168,10 +172,13 @@
     const refreshBtn = document.getElementById('refreshBtn');
     const uploadsList = document.getElementById('uploads');
     const tabs = document.getElementById('tabs');
+    const folderSelect = document.getElementById('folderSelect');
+    const createFolderBtn = document.getElementById('createFolderBtn');
 
     let authed = false;
     let currentSort = 'recent';
     let currentFiles = [];
+    let currentFolder = '';
 
     async function api(path, opts = {}) {
       const res = await fetch(path, {
@@ -215,7 +222,8 @@
     async function loadFiles() {
       fileList.innerHTML = '<li class="muted">Loading…</li>';
       try {
-        const data = await api('/api/files');
+        const qs = currentFolder ? `?folder=${encodeURIComponent(currentFolder)}` : '';
+        const data = await api(`/api/files${qs}`);
         renderFiles(data.files || []);
         await loadStorage();
       } catch (e) {
@@ -265,14 +273,15 @@
             <div class="muted">${date}</div>
           </div>
           <div class="actions">
-            <a class="btn secondary" href="/download/${encodeURIComponent(f.name)}">Download</a>
+            <a class="btn secondary" href="/download/${encodeURIComponent(f.name)}${currentFolder ? `?folder=${encodeURIComponent(currentFolder)}` : ''}">Download</a>
             <button class="btn secondary" data-dl="${encodeURIComponent(f.name)}">Boost DL</button>
             <button class="btn danger">Delete</button>
           </div>
         `;
         li.querySelector('.btn.danger').addEventListener('click', async () => {
           if (!confirm('Delete this file?')) return;
-          const res = await fetch(`/api/files/${encodeURIComponent(f.name)}`, { method: 'DELETE' });
+          const url = `/api/files/${encodeURIComponent(f.name)}${currentFolder ? `?folder=${encodeURIComponent(currentFolder)}` : ''}`;
+          const res = await fetch(url, { method: 'DELETE' });
           if (!res.ok) { alert('Failed to delete'); return; }
           await loadFiles();
         });
@@ -325,7 +334,7 @@
 
     async function acceleratedDownload(fileName, fileSize) {
       try {
-        const url = `/file/${encodeURIComponent(fileName)}`;
+        const url = `/file/${encodeURIComponent(fileName)}${currentFolder ? `?folder=${encodeURIComponent(currentFolder)}` : ''}`;
         const parallel = Math.min(2, Math.ceil(fileSize / (8 * 1024 * 1024)) || 1);
         const chunkSize = Math.ceil(fileSize / parallel);
         const ranges = Array.from({ length: parallel }, (_, i) => ({
@@ -363,7 +372,7 @@
         setTimeout(() => URL.revokeObjectURL(href), 1000);
       } catch (e) {
         // fallback
-        location.href = `/download/${encodeURIComponent(fileName)}`;
+        location.href = `/download/${encodeURIComponent(fileName)}${currentFolder ? `?folder=${encodeURIComponent(currentFolder)}` : ''}`;
       }
     }
 
@@ -406,7 +415,8 @@
 
       return new Promise((resolve, reject) => {
         const xhr = new XMLHttpRequest();
-        xhr.open('POST', '/api/upload', true);
+        const target = currentFolder ? `/api/upload?folder=${encodeURIComponent(currentFolder)}` : '/api/upload';
+        xhr.open('POST', target, true);
         xhr.withCredentials = true;
         const form = new FormData();
         form.append('files', file);
@@ -490,7 +500,7 @@
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           credentials: 'same-origin',
-          body: JSON.stringify({ filename: file.name, size: file.size, chunkSize, totalChunks }),
+          body: JSON.stringify({ filename: file.name, size: file.size, chunkSize, totalChunks, folder: currentFolder }),
         });
         if (!initRes.ok) throw new Error('init failed');
         ({ uploadId } = await initRes.json());
@@ -513,7 +523,8 @@
               for (let k = 0; k < attempts; k++) {
                 try {
                   if (controller.signal.aborted) throw new Error('aborted');
-                  const res = await fetch(`/api/upload/chunk?uploadId=${encodeURIComponent(uploadId)}&index=${i}`, {
+                  const url = `/api/upload/chunk?uploadId=${encodeURIComponent(uploadId)}&index=${i}`;
+                  const res = await fetch(url, {
                     method: 'PUT',
                     body: chunk,
                     credentials: 'same-origin',
@@ -588,9 +599,32 @@
 
     refreshBtn.addEventListener('click', loadFiles);
     setInterval(() => { if (authed) loadStorage(); }, 15000);
+    folderSelect.addEventListener('change', () => {
+      currentFolder = folderSelect.value || '';
+      loadFiles();
+    });
+    createFolderBtn.addEventListener('click', async () => {
+      const name = prompt('New folder name:');
+      if (!name) return;
+      const res = await fetch('/api/folders', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'same-origin', body: JSON.stringify({ name })
+      });
+      if (!res.ok) { alert('Failed to create folder'); return; }
+      await loadFolders();
+    });
+    async function loadFolders() {
+      try {
+        const res = await fetch('/api/folders', { credentials: 'same-origin' });
+        if (!res.ok) return;
+        const data = await res.json();
+        const cur = folderSelect.value;
+        folderSelect.innerHTML = `<option value="">/ (root)</option>` + (data.folders || []).map(f => `<option value="${f}">${f}</option>`).join('');
+        folderSelect.value = cur || '';
+      } catch {}
+    }
 
     // Attempt to load files to detect session state on first paint
-    loadFiles().then(() => setLoggedIn(true)).catch(() => setLoggedIn(false));
+    loadFiles().then(() => { setLoggedIn(true); loadFolders(); }).catch(() => setLoggedIn(false));
   </script>
 </body>
 </html>

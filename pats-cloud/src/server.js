@@ -104,6 +104,23 @@ function sanitizeFilename(name) {
   return name.replace(/[^a-zA-Z0-9._-]/g, '_');
 }
 
+function sanitizeFolderName(input) {
+  if (!input || typeof input !== 'string') return '';
+  const trimmed = input.trim();
+  if (!trimmed) return '';
+  // Replace disallowed chars and collapse slashes to prevent traversal
+  const safe = trimmed.replace(/[\\/]+/g, '_').replace(/[^a-zA-Z0-9._-]/g, '_');
+  return safe;
+}
+
+function resolveFolderDir(folderParam) {
+  const safeFolder = sanitizeFolderName(folderParam);
+  const dir = safeFolder ? path.join(UPLOAD_DIR, safeFolder) : UPLOAD_DIR;
+  const normalized = path.resolve(dir);
+  if (!normalized.startsWith(UPLOAD_DIR)) return UPLOAD_DIR;
+  return normalized;
+}
+
 function getCollisionSafeName(directory, desiredName) {
   const parsed = path.parse(desiredName);
   const base = sanitizeFilename(parsed.name);
@@ -118,8 +135,14 @@ function getCollisionSafeName(directory, desiredName) {
 }
 
 const storage = multer.diskStorage({
-  destination: (_req, _file, cb) => {
-    cb(null, UPLOAD_DIR);
+  destination: (req, _file, cb) => {
+    try {
+      const targetDir = resolveFolderDir(req.query.folder);
+      fs.mkdirSync(targetDir, { recursive: true });
+      cb(null, targetDir);
+    } catch (e) {
+      cb(e);
+    }
   },
   filename: (_req, file, cb) => {
     const unique = getCollisionSafeName(UPLOAD_DIR, file.originalname);
@@ -135,14 +158,15 @@ const upload = multer({
 });
 
 // API routes
-app.get('/api/files', requireAuth, async (_req, res) => {
+app.get('/api/files', requireAuth, async (req, res) => {
   try {
-    const entries = await fs.promises.readdir(UPLOAD_DIR, { withFileTypes: true });
+    const targetDir = resolveFolderDir(req.query.folder);
+    const entries = await fs.promises.readdir(targetDir, { withFileTypes: true });
     const files = await Promise.all(
       entries
         .filter((d) => d.isFile())
         .map(async (d) => {
-          const filePath = path.join(UPLOAD_DIR, d.name);
+          const filePath = path.join(targetDir, d.name);
           const stat = await fs.promises.stat(filePath);
           return {
             name: d.name,
@@ -152,7 +176,7 @@ app.get('/api/files', requireAuth, async (_req, res) => {
         })
     );
     files.sort((a, b) => b.modifiedAt - a.modifiedAt);
-    res.json({ files });
+    res.json({ files, folder: req.query.folder ? sanitizeFolderName(String(req.query.folder)) : '' });
   } catch (err) {
     res.status(500).json({ error: 'Failed to list files' });
   }
@@ -165,7 +189,8 @@ app.post('/api/upload', requireAuth, upload.array('files', 20), (req, res) => {
 
 app.get('/download/:name', requireAuth, async (req, res) => {
   const name = path.basename(req.params.name);
-  const filePath = path.join(UPLOAD_DIR, name);
+  const dir = resolveFolderDir(req.query.folder);
+  const filePath = path.join(dir, name);
   if (!filePath.startsWith(UPLOAD_DIR)) {
     return res.status(400).json({ error: 'Invalid path' });
   }
@@ -179,7 +204,8 @@ app.get('/download/:name', requireAuth, async (req, res) => {
 app.get('/file/:name', requireAuth, async (req, res) => {
   try {
     const name = path.basename(req.params.name);
-    const filePath = path.join(UPLOAD_DIR, name);
+    const dir = resolveFolderDir(req.query.folder);
+    const filePath = path.join(dir, name);
     if (!filePath.startsWith(UPLOAD_DIR)) return res.status(400).json({ error: 'Invalid path' });
     const stat = await fs.promises.stat(filePath).catch(() => null);
     if (!stat || !stat.isFile()) return res.status(404).json({ error: 'Not found' });
@@ -220,7 +246,8 @@ app.get('/file/:name', requireAuth, async (req, res) => {
 
 app.delete('/api/files/:name', requireAuth, async (req, res) => {
   const name = path.basename(req.params.name);
-  const filePath = path.join(UPLOAD_DIR, name);
+  const dir = resolveFolderDir(req.query.folder);
+  const filePath = path.join(dir, name);
   if (!filePath.startsWith(UPLOAD_DIR)) {
     return res.status(400).json({ error: 'Invalid path' });
   }
@@ -239,14 +266,14 @@ function generateUploadId() {
 
 app.post('/api/upload/init', requireAuth, limiter, express.json(), async (req, res) => {
   try {
-    const { filename, size, chunkSize, totalChunks } = req.body || {};
+    const { filename, size, chunkSize, totalChunks, folder } = req.body || {};
     if (!filename || !size || !chunkSize || !totalChunks) {
       return res.status(400).json({ error: 'Missing fields' });
     }
     const id = generateUploadId();
     const dir = path.join(CHUNK_DIR, id);
     await fs.promises.mkdir(dir, { recursive: true });
-    const meta = { filename: sanitizeFilename(path.parse(filename).name) + path.parse(filename).ext.toLowerCase(), size: Number(size), chunkSize: Number(chunkSize), totalChunks: Number(totalChunks), createdAt: Date.now() };
+    const meta = { filename: sanitizeFilename(path.parse(filename).name) + path.parse(filename).ext.toLowerCase(), size: Number(size), chunkSize: Number(chunkSize), totalChunks: Number(totalChunks), createdAt: Date.now(), folder: sanitizeFolderName(folder) };
     await fs.promises.writeFile(path.join(dir, 'meta.json'), JSON.stringify(meta));
     res.json({ uploadId: id });
   } catch (e) {
@@ -283,8 +310,10 @@ app.post('/api/upload/complete', requireAuth, limiter, express.json(), async (re
     const metaPath = path.join(dir, 'meta.json');
     if (!fs.existsSync(metaPath)) return res.status(404).json({ error: 'upload not found' });
     const meta = JSON.parse(await fs.promises.readFile(metaPath, 'utf8'));
-    const safeOutName = getCollisionSafeName(UPLOAD_DIR, meta.filename);
-    const outPath = path.join(UPLOAD_DIR, safeOutName);
+    const targetDir = resolveFolderDir(meta.folder);
+    await fs.promises.mkdir(targetDir, { recursive: true });
+    const safeOutName = getCollisionSafeName(targetDir, meta.filename);
+    const outPath = path.join(targetDir, safeOutName);
 
     const writeStream = fs.createWriteStream(outPath, { flags: 'w' });
     for (let i = 0; i < meta.totalChunks; i++) {
@@ -330,6 +359,30 @@ app.delete('/api/upload/abort/:uploadId', requireAuth, async (req, res) => {
   }
 });
 
+// Folders APIs
+app.get('/api/folders', requireAuth, async (_req, res) => {
+  try {
+    const entries = await fs.promises.readdir(UPLOAD_DIR, { withFileTypes: true });
+    const folders = entries.filter((d) => d.isDirectory() && d.name !== '.chunks').map((d) => d.name).sort((a, b) => a.localeCompare(b));
+    res.json({ folders });
+  } catch (e) {
+    res.status(500).json({ error: 'Failed to list folders' });
+  }
+});
+
+app.post('/api/folders', requireAuth, express.json(), async (req, res) => {
+  try {
+    const { name } = req.body || {};
+    const safe = sanitizeFolderName(name);
+    if (!safe) return res.status(400).json({ error: 'Invalid folder name' });
+    const dir = path.join(UPLOAD_DIR, safe);
+    await fs.promises.mkdir(dir, { recursive: true });
+    res.json({ ok: true, name: safe });
+  } catch (e) {
+    res.status(500).json({ error: 'Failed to create folder' });
+  }
+});
+
 async function getFsTotals(targetPath) {
   if (fs.promises.statfs) {
     try {
@@ -359,16 +412,21 @@ async function getFsTotals(targetPath) {
 }
 
 async function getUploadsUsedBytes() {
-  const entries = await fs.promises.readdir(UPLOAD_DIR, { withFileTypes: true });
-  let total = 0;
-  for (const entry of entries) {
-    if (entry.name === '.chunks') continue;
-    if (entry.isFile()) {
-      const stat = await fs.promises.stat(path.join(UPLOAD_DIR, entry.name));
-      total += stat.size;
+  async function walk(dir) {
+    const entries = await fs.promises.readdir(dir, { withFileTypes: true });
+    let acc = 0;
+    for (const e of entries) {
+      if (e.name === '.chunks') continue;
+      const full = path.join(dir, e.name);
+      if (e.isDirectory()) acc += await walk(full);
+      else if (e.isFile()) {
+        const stat = await fs.promises.stat(full);
+        acc += stat.size;
+      }
     }
+    return acc;
   }
-  return total;
+  return walk(UPLOAD_DIR);
 }
 
 app.get('/api/storage', requireAuth, async (_req, res) => {
