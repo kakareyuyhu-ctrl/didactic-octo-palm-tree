@@ -11,7 +11,7 @@ import crypto from 'crypto';
 import rateLimit from 'express-rate-limit';
 import { execFile } from 'child_process';
 import mime from 'mime-types';
-import { isCloudConfigured, uploadFileToCloud } from './cloud.js';
+import { isCloudConfigured, uploadFileToCloud, getTeraboxConfig, setTeraboxConfig } from './cloud.js';
 
 dotenv.config();
 
@@ -365,6 +365,17 @@ app.post('/api/upload/complete', requireAuth, limiter, express.json(), async (re
 
 app.get('/api/cloud/status', requireAuth, (_req, res) => {
   res.json({ enabled: enableCloudMirror && isCloudConfigured() });
+});
+
+// TeraBox config endpoints (optional)
+app.get('/api/cloud/terabox', requireAuth, (_req, res) => {
+  res.json(getTeraboxConfig());
+});
+app.post('/api/cloud/terabox', requireAuth, express.json(), (req, res) => {
+  const { ndus, appId, uploadId, dir } = req.body || {};
+  if (!ndus || !appId || !uploadId) return res.status(400).json({ error: 'Missing fields' });
+  setTeraboxConfig({ ndus, appId, uploadId, dir });
+  res.json({ ok: true });
 });
 
 app.delete('/api/upload/abort/:uploadId', requireAuth, async (req, res) => {

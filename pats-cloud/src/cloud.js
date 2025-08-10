@@ -6,6 +6,8 @@ dotenv.config();
 const provider = (process.env.CLOUD_PROVIDER || '').toLowerCase();
 
 let uploader = null;
+let currentProvider = provider;
+let teraboxCreds = null; // { ndus, appId, uploadId, dir }
 
 if (provider === 's3') {
   const initS3 = async () => {
@@ -22,40 +24,48 @@ if (provider === 's3') {
       await s3.send(cmd);
     };
   };
-  uploader = await initS3();
+  const init = await initS3();
+  if (init) uploader = init;
 } else if (provider === 'terabox') {
-  try {
-    // Lazy require to avoid install cost when unused
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-    const TeraboxUploader = (await import('terabox-upload-tool')).default || (await import('terabox-upload-tool'));
-    const ndus = process.env.TERA_NDUS || '';
-    const appId = process.env.TERA_APP_ID || '';
-    const uploadId = process.env.TERA_UPLOAD_ID || '';
-    const defaultDir = process.env.TERA_DIR || '/';
-    if (ndus && appId && uploadId) {
-      uploader = async function uploadTerabox(filePath, key, _contentType = 'application/octet-stream') {
-        const creds = { ndus, appId, uploadId };
-        const client = new TeraboxUploader(creds);
-        const targetDirectory = defaultDir;
-        await new Promise((resolve, reject) => {
-          client.uploadFile(filePath, () => {}, targetDirectory)
-            .then(resolve)
-            .catch(reject);
-        });
-      };
-    }
-  } catch {
-    uploader = null;
+  const ndus = process.env.TERA_NDUS || '';
+  const appId = process.env.TERA_APP_ID || '';
+  const uploadId = process.env.TERA_UPLOAD_ID || '';
+  const dir = process.env.TERA_DIR || '/';
+  if (ndus && appId && uploadId) {
+    teraboxCreds = { ndus, appId, uploadId, dir };
   }
 }
 
 export function isCloudConfigured() {
-  return Boolean(uploader);
+  if (currentProvider === 's3') return Boolean(uploader);
+  if (currentProvider === 'terabox') return Boolean(teraboxCreds);
+  return false;
 }
 
 export async function uploadFileToCloud(filePath, key, contentType) {
-  if (!uploader) throw new Error('Cloud not configured');
-  // key may be ignored by some providers (e.g., TeraBox)
-  const safeKey = key || path.basename(filePath);
-  return uploader(filePath, safeKey, contentType);
+  if (currentProvider === 's3') {
+    if (!uploader) throw new Error('Cloud not configured');
+    const safeKey = key || path.basename(filePath);
+    return uploader(filePath, safeKey, contentType);
+  }
+  if (currentProvider === 'terabox') {
+    if (!teraboxCreds) throw new Error('Cloud not configured');
+    const TeraboxUploader = (await import('terabox-upload-tool')).default || (await import('terabox-upload-tool'));
+    const client = new TeraboxUploader({ ndus: teraboxCreds.ndus, appId: teraboxCreds.appId, uploadId: teraboxCreds.uploadId });
+    const targetDirectory = teraboxCreds.dir || '/';
+    await client.uploadFile(filePath, () => {}, targetDirectory);
+    return;
+  }
+  throw new Error('No cloud provider');
+}
+
+export function getTeraboxConfig() {
+  if (currentProvider !== 'terabox') return { enabled: false };
+  const has = Boolean(teraboxCreds);
+  return { enabled: has, dir: teraboxCreds?.dir || '/', appId: teraboxCreds?.appId || '' };
+}
+
+export function setTeraboxConfig({ ndus, appId, uploadId, dir }) {
+  currentProvider = 'terabox';
+  teraboxCreds = { ndus, appId, uploadId, dir: dir || '/' };
 }
