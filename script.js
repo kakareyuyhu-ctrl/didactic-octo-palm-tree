@@ -27,6 +27,44 @@
   let audioUrl = '';
   let bestFilenameBase = 'tiktok-video';
 
+  // Tiny cache (memory + localStorage) for repeat speed
+  const memoryCache = new Map();
+  const CACHE_PREFIX = 'novatok_cache_v1:';
+  const DEFAULT_TTL_MS = 1000 * 60 * 30; // 30 minutes
+  function cacheGet(key) {
+    const mem = memoryCache.get(key);
+    if (mem && mem.expires > Date.now()) return mem.value;
+    try {
+      const raw = localStorage.getItem(CACHE_PREFIX + key);
+      if (!raw) return null;
+      const { value, expires } = JSON.parse(raw);
+      if (expires > Date.now()) {
+        memoryCache.set(key, { value, expires });
+        return value;
+      } else {
+        localStorage.removeItem(CACHE_PREFIX + key);
+      }
+    } catch (_) {}
+    return null;
+  }
+  function cacheSet(key, value, ttlMs = DEFAULT_TTL_MS) {
+    const expires = Date.now() + ttlMs;
+    memoryCache.set(key, { value, expires });
+    try { localStorage.setItem(CACHE_PREFIX + key, JSON.stringify({ value, expires })); } catch (_) {}
+  }
+
+  // Deduplicate concurrent identical requests
+  const inflight = new Map();
+  async function dedupe(key, factory) {
+    if (inflight.has(key)) return inflight.get(key);
+    const p = (async () => {
+      try { return await factory(); }
+      finally { inflight.delete(key); }
+    })();
+    inflight.set(key, p);
+    return p;
+  }
+
   const withTimeout = async (promise, ms, onTimeout) => {
     let to;
     const timeoutPromise = new Promise((_, rej) => {
@@ -72,17 +110,27 @@
   }
 
   async function fetchOEmbed(targetUrl, signal) {
+    const cacheKey = `oembed:${targetUrl}`;
+    const cached = cacheGet(cacheKey);
+    if (cached) return cached;
     const endpoint = `https://www.tiktok.com/oembed?url=${encodeURIComponent(targetUrl)}`;
     const res = await fetch(endpoint, { headers: { 'Accept': 'application/json' }, signal });
     if (!res.ok) throw new Error(`oEmbed failed: ${res.status}`);
-    return res.json();
+    const data = await res.json();
+    cacheSet(cacheKey, data, DEFAULT_TTL_MS);
+    return data;
   }
 
   async function fetchViaReader(targetUrl, signal) {
+    const cacheKey = `reader:${targetUrl}`;
+    const cached = cacheGet(cacheKey);
+    if (cached) return cached;
     const readerUrl = `https://r.jina.ai/${targetUrl}`;
     const res = await fetch(readerUrl, { redirect: 'follow', signal });
     if (!res.ok) throw new Error(`Reader fetch failed: ${res.status}`);
-    return res.text();
+    const html = await res.text();
+    cacheSet(cacheKey, html, DEFAULT_TTL_MS);
+    return html;
   }
 
   function extractCanonicalFromHtml(html) {
@@ -119,22 +167,30 @@
   }
 
   async function fetchTikwm(targetUrl, signal) {
+    const cacheKey = `tikwm:${targetUrl}`;
+    const cached = cacheGet(cacheKey);
+    if (cached) return cached;
     const endpoint = `https://www.tikwm.com/api/?hd=1&url=${encodeURIComponent(targetUrl)}`;
     const res = await fetch(endpoint, { headers: { 'Accept': 'application/json' }, signal });
     if (!res.ok) throw new Error(`tikwm failed: ${res.status}`);
     const json = await res.json();
     if (json?.code !== 0 || !json?.data) throw new Error('tikwm error');
+    cacheSet(cacheKey, json.data, DEFAULT_TTL_MS);
     return json.data;
   }
 
   async function fetchTikmate(targetUrl, signal) {
+    const cacheKey = `tikmate:${targetUrl}`;
+    const cached = cacheGet(cacheKey);
+    if (cached) return cached;
     const endpoint = `https://api.tikmate.app/api/lookup?url=${encodeURIComponent(targetUrl)}`;
     const res = await fetch(endpoint, { headers: { 'Accept': 'application/json' }, signal });
     if (!res.ok) throw new Error(`tikmate lookup failed: ${res.status}`);
     const json = await res.json();
     if (!json?.id || !json?.token) throw new Error('tikmate error');
-    const videoUrl = `https://tikmate.app/download/${json.token}/${json.id}.mp4`;
-    return { videoUrl };
+    const data = { videoUrl: `https://tikmate.app/download/${json.token}/${json.id}.mp4` };
+    cacheSet(cacheKey, data, DEFAULT_TTL_MS);
+    return data;
   }
 
   function setDownloads({ nowm, wm, audio, filenameBase }) {
@@ -252,13 +308,8 @@
   async function downloadAudio() { if (!audioUrl) return; await autoDownloadUrl(audioUrl, `${bestFilenameBase}.mp3`, dlAudio); }
 
   async function preheat() {
-    // Fire-and-forget HEADs to warm DNS/TLS
-    [
-      'https://www.tiktok.com/oembed',
-      'https://www.tikwm.com/api/',
-      'https://api.tikmate.app/api/lookup',
-      'https://r.jina.ai/http://example.com'
-    ].forEach(u => { fetch(u, { method: 'HEAD', mode: 'no-cors' }).catch(() => {}); });
+    ['https://www.tiktok.com/oembed','https://www.tikwm.com/api/','https://api.tikmate.app/api/lookup','https://r.jina.ai/http://example.com']
+      .forEach(u => { fetch(u, { method: 'HEAD', mode: 'no-cors' }).catch(() => {}); });
   }
 
   async function handleLookup(event) {
@@ -278,25 +329,21 @@
     const acGeneral = new AbortController();
     const { signal } = acGeneral;
 
-    const canonicalPromise = resolveCanonicalIfShort(normalized, signal);
-    const oembedPromise = fetchOEmbed(normalized, signal).catch(() => null);
-    const readerPromise = fetchViaReader(normalized, signal).catch(() => '');
-
-    // Race TikWM vs Tikmate with aggressive timeout and cancellation
-    const acTikwm = new AbortController();
-    const acTikmate = new AbortController();
+    // Use dedupe + cache to avoid duplicate concurrent calls
+    const canonicalPromise = dedupe(`canonical:${normalized}`, () => resolveCanonicalIfShort(normalized, signal));
+    const oembedPromise = dedupe(`oembed:${normalized}`, () => fetchOEmbed(normalized, signal).catch(() => null));
+    const readerPromise = dedupe(`reader:${normalized}`, () => fetchViaReader(normalized, signal).catch(() => ''));
 
     const targetUrl = await withTimeout(canonicalPromise, 6000, () => acGeneral.abort()).catch(() => normalized);
 
-    const tikwmP = withTimeout(fetchTikwm(targetUrl, acTikwm.signal), 8000, () => acTikwm.abort()).catch(() => null);
-    const tikmateP = withTimeout(fetchTikmate(targetUrl, acTikmate.signal), 8000, () => acTikmate.abort()).catch(() => null);
+    const acTikwm = new AbortController();
+    const acTikmate = new AbortController();
+    const tikwmP = dedupe(`tikwm:${targetUrl}`, () => withTimeout(fetchTikwm(targetUrl, acTikwm.signal), 8000, () => acTikwm.abort()).catch(() => null));
+    const tikmateP = dedupe(`tikmate:${targetUrl}`, () => withTimeout(fetchTikmate(targetUrl, acTikmate.signal), 8000, () => acTikmate.abort()).catch(() => null));
 
     let first = await Promise.race([tikwmP.then(r => ({ src: 'tikwm', r })), tikmateP.then(r => ({ src: 'tikmate', r }))]);
     if (!first || !first.r) { first = { src: 'none', r: null }; }
-
-    // Cancel the loser
-    if (first.src === 'tikwm') acTikmate.abort();
-    else if (first.src === 'tikmate') acTikwm.abort();
+    if (first.src === 'tikwm') acTikmate.abort(); else if (first.src === 'tikmate') acTikwm.abort();
 
     if (first.r && first.r.videoUrl) applyTikmateData(targetUrl, first.r, new URL(targetUrl).pathname.split('/').pop());
     else if (first.r) applyTikwmData(targetUrl, first.r);
@@ -305,7 +352,6 @@
       if (tw) applyTikwmData(targetUrl, tw); else if (tm) applyTikmateData(targetUrl, tm, new URL(targetUrl).pathname.split('/').pop());
     }
 
-    // Fill details; if reader and oembed both pending, whichever first updates UI
     const details = await Promise.race([oembedPromise.then(o => ({ o })), readerPromise.then(h => ({ h }))]).catch(() => ({}));
     if (details?.o) renderFromOEmbed(targetUrl, details.o);
     else if (details?.h) renderMetaBasics(targetUrl, extractMetaFromHtml(details.h));
