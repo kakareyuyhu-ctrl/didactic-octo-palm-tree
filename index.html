@@ -3,9 +3,13 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>TikTok Downloader</title>
+  <title>NovaTok — Ultra‑fast TikTok Downloader</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
   <link rel="stylesheet" href="./style.css" />
-  <meta name="description" content="Download TikTok videos (no key) and view details from any TikTok URL." />
+  <meta name="description" content="NovaTok is a premium, ultra‑fast TikTok downloader with smart fallbacks and no API keys required." />
   <link rel="preconnect" href="https://www.tiktok.com" crossorigin>
   <link rel="dns-prefetch" href="//www.tiktok.com">
   <link rel="preconnect" href="https://www.tikwm.com" crossorigin>
@@ -19,8 +23,17 @@
   <script>document.addEventListener('DOMContentLoaded',()=>document.body.classList.add('ready'))</script>
 </head>
 <body>
+  <header class="nav">
+    <div class="brand">
+      <img src="./favicon.svg" alt="NovaTok logo" width="24" height="24" />
+      <span class="brand-name">NovaTok</span>
+    </div>
+    <div class="tag">Ultra‑fast. No keys. Smart fallbacks.</div>
+  </header>
+
   <main class="container">
-    <h1>TikTok Downloader</h1>
+    <h1>NovaTok</h1>
+    <p class="sub">Download TikTok videos instantly in premium quality — no watermark, watermark, or MP3. Paste a link and go.</p>
     <form id="lookup-form" autocomplete="off" novalidate>
       <label for="url-input">Paste TikTok URL</label>
       <div class="input-row">

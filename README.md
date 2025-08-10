@@ -1,11 +1,11 @@
-# TikTok Downloader (No-Key)
+# NovaTok — Ultra‑fast TikTok Downloader
 
-A minimal static site that fetches TikTok video details and provides direct download links, using public, no-key APIs.
+A premium, ultra‑fast TikTok downloader with smart fallbacks and no API keys.
 
 - Supports multiple URL formats: `tiktok.com`, `m.tiktok.com`, `vm.tiktok.com`, `vt.tiktok.com`
-- Primary API: TikWM (`https://www.tikwm.com/api/?url=...`) – provides no-watermark, watermark, and audio links
-- Fallback API: Tikmate lookup (`https://api.tikmate.app/api/lookup?url=...`) – provides a direct MP4 link
-- Details via TikTok oEmbed and HTML metadata with a reader fallback
+- Primary API: TikWM (no‑watermark, watermark, audio)
+- Fallback API: Tikmate (direct MP4)
+- Details via TikTok oEmbed and HTML metadata
 
 ## Quick start
 
@@ -19,7 +19,5 @@ Then visit `http://localhost:8080`.
 
 ## Notes
 
-- No API keys are required. These public endpoints may change or rate-limit.
-- Some links may not be HD if the source doesn't expose it; the app tries `hd=1` with TikWM.
-- If downloads fail in your region, try a VPN; availability can be geo-dependent.
+- No API keys are required. Endpoints may change or rate‑limit.
 - Respect creators' rights and platform terms. Only download content you have permission to use.
