@@ -18,6 +18,14 @@ dotenv.config();
 const enableCloudMirror = (process.env.CLOUD_MIRROR || 'false').toLowerCase() === 'true';
 const cloudPrefix = process.env.CLOUD_PREFIX || '';
 
+// Cloud mirror event log (in-memory)
+const cloudEvents = [];
+function logCloud(event) {
+  const entry = { ts: Date.now(), ...event };
+  cloudEvents.push(entry);
+  if (cloudEvents.length > 200) cloudEvents.shift();
+}
+
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
@@ -203,7 +211,9 @@ app.post('/api/upload', requireAuth, upload.array('files', 20), (req, res) => {
       const fullPath = path.join(dir, f.name);
       const key = path.posix.join(cloudPrefix, (req.query.folder ? String(req.query.folder) : ''), f.name).replace(/\\/g, '/');
       const type = f.mimetype || 'application/octet-stream';
-      uploadFileToCloud(fullPath, key, type).catch(() => {});
+      uploadFileToCloud(fullPath, key, type)
+        .then(() => logCloud({ ok: true, file: f.name, key }))
+        .catch((e) => logCloud({ ok: false, file: f.name, key, error: String(e?.message || e) }));
     }
   }
   res.json({ ok: true, uploaded: uploaded.map(({ path, mimetype, ...rest }) => rest), mirrored: isCloudConfigured() });
@@ -365,7 +375,9 @@ app.post('/api/upload/complete', requireAuth, limiter, express.json(), async (re
     // Background cloud mirror
     if (isCloudConfigured()) {
       const key = path.posix.join(cloudPrefix, (meta.folder || ''), path.basename(outPath)).replace(/\\/g, '/');
-      uploadFileToCloud(outPath, key, mime.lookup(outPath) || 'application/octet-stream').catch(() => {});
+      uploadFileToCloud(outPath, key, mime.lookup(outPath) || 'application/octet-stream')
+        .then(() => logCloud({ ok: true, file: path.basename(outPath), key }))
+        .catch((e) => logCloud({ ok: false, file: path.basename(outPath), key, error: String(e?.message || e) }));
     }
     res.json({ ok: true, file: { name: path.basename(outPath), size: stat.size }, mirrored: isCloudConfigured() });
   } catch (e) {
@@ -375,6 +387,11 @@ app.post('/api/upload/complete', requireAuth, limiter, express.json(), async (re
 
 app.get('/api/cloud/status', requireAuth, (_req, res) => {
   res.json({ enabled: isCloudConfigured() });
+});
+
+app.get('/api/cloud/events', requireAuth, (_req, res) => {
+  const last = cloudEvents.slice(-50);
+  res.json({ events: last });
 });
 
 // TeraBox config endpoints (optional)
