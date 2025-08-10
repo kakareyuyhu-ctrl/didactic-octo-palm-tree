@@ -1,24 +1,12 @@
-[dotenv@17.2.1] injecting env (0) from .env -- tip: 📡 auto-backup env with Radar: https://dotenvx.com/radar
+[dotenv@17.2.1] injecting env (0) from .env -- tip: 🔐 encrypt with Dotenvx: https://dotenvx.com
 Pats Cloud running on http://localhost:3000
-[0mGET / [32m200[0m 4.341 ms - 13172[0m
-[0mGET / [32m200[0m 3.060 ms - 13172[0m
-[0mGET /api/files [33m401[0m 1.199 ms - 24[0m
-[0mPOST /api/upload/init [33m401[0m 0.394 ms - 24[0m
-[0mGET /api/files [33m401[0m 0.362 ms - 24[0m
-[0mPOST /logout [32m200[0m 0.872 ms - 11[0m
-[0mPOST /login [32m200[0m 0.617 ms - 11[0m
-[0mGET /api/files [36m304[0m 1.261 ms - -[0m
-[0mGET /api/files [36m304[0m 1.706 ms - -[0m
-[0mGET / [36m304[0m 1.022 ms - -[0m
-[0mGET /api/files [36m304[0m 1.381 ms - -[0m
-[0mPOST /api/upload/init [32m200[0m 3.276 ms - 34[0m
-[0mPUT /api/upload/chunk?uploadId=2ylv4cbbozime64x77k&index=0 [31m500[0m 0.938 ms - 32[0m
-[0mGET /api/files [36m304[0m 0.790 ms - -[0m
-[0mGET /api/files [36m304[0m 1.177 ms - -[0m
-[0mGET /api/files [36m304[0m 0.752 ms - -[0m
-[0mPOST /api/upload/init [32m200[0m 1.762 ms - 33[0m
-[0mPUT /api/upload/chunk?uploadId=ijf9qulhy4me64xmww&index=0 [31m500[0m 0.640 ms - 32[0m
-[0mGET /api/files [36m304[0m 1.155 ms - -[0m
-[0mPOST /api/upload/init [32m200[0m 2.141 ms - 34[0m
-[0mPUT /api/upload/chunk?uploadId=dhit24n0l3pme64xubm&index=0 [31m500[0m 0.717 ms - 32[0m
-[0mGET /api/files [36m304[0m 0.829 ms - -[0m
+[0mGET / [36m304[0m 2.785 ms - -[0m
+[0mGET /api/files [33m401[0m 1.023 ms - 24[0m
+[0mPOST /login [32m200[0m 8.478 ms - 11[0m
+[0mPOST /api/upload/init [32m200[0m 1.814 ms - 34[0m
+[0mPUT /api/upload/chunk?uploadId=jry3faynk1ame651sfa&index=0 [32m200[0m 12.266 ms - 36[0m
+[0mPUT /api/upload/chunk?uploadId=jry3faynk1ame651sfa&index=1 [32m200[0m 7.626 ms - 36[0m
+[0mPUT /api/upload/chunk?uploadId=jry3faynk1ame651sfa&index=2 [32m200[0m 10.416 ms - 36[0m
+[0mPUT /api/upload/chunk?uploadId=jry3faynk1ame651sfa&index=3 [32m200[0m 10.830 ms - 36[0m
+[0mPOST /api/upload/complete [32m200[0m 31.926 ms - 67[0m
+[0mGET /api/files [33m401[0m 0.439 ms - 24[0m

@@ -7,6 +7,8 @@ import path from 'path';
 import fs from 'fs';
 import { fileURLToPath } from 'url';
 import dotenv from 'dotenv';
+import crypto from 'crypto';
+import rateLimit from 'express-rate-limit';
 
 dotenv.config();
 
@@ -42,9 +44,10 @@ app.use(
   })
 );
 
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
 app.use(morgan('dev'));
+
+// Lightweight rate limit for auth and init/complete
+const limiter = rateLimit({ windowMs: 60 * 1000, max: 120 });
 
 // Sessions
 const sessionSecret = process.env.SESSION_SECRET || 'dev_secret_change_me';
@@ -73,7 +76,7 @@ function requireAuth(req, res, next) {
   return res.status(401).json({ error: 'Unauthorized' });
 }
 
-app.post('/login', (req, res) => {
+app.post('/login', limiter, express.json(), (req, res) => {
   const { password } = req.body;
   if (!appPassword) {
     // If no password configured, allow login by default but warn
@@ -87,7 +90,7 @@ app.post('/login', (req, res) => {
   return res.status(401).json({ error: 'Invalid password' });
 });
 
-app.post('/logout', (req, res) => {
+app.post('/logout', limiter, (req, res) => {
   req.session.destroy(() => {
     res.clearCookie('patscloud.sid');
     res.json({ ok: true });
@@ -178,7 +181,7 @@ function generateUploadId() {
   return Math.random().toString(36).slice(2) + Date.now().toString(36);
 }
 
-app.post('/api/upload/init', requireAuth, async (req, res) => {
+app.post('/api/upload/init', requireAuth, limiter, express.json(), async (req, res) => {
   try {
     const { filename, size, chunkSize, totalChunks } = req.body || {};
     if (!filename || !size || !chunkSize || !totalChunks) {
@@ -195,7 +198,7 @@ app.post('/api/upload/init', requireAuth, async (req, res) => {
   }
 });
 
-app.put('/api/upload/chunk', requireAuth, express.raw({ type: '*/*', limit: '2gb' }), async (req, res) => {
+app.put('/api/upload/chunk', requireAuth, express.raw({ type: () => true, limit: '5gb' }), async (req, res) => {
   try {
     const { uploadId, index } = req.query;
     if (!uploadId || typeof uploadId !== 'string') return res.status(400).json({ error: 'uploadId required' });
@@ -204,15 +207,19 @@ app.put('/api/upload/chunk', requireAuth, express.raw({ type: '*/*', limit: '2gb
     const dir = path.join(CHUNK_DIR, uploadId);
     const metaPath = path.join(dir, 'meta.json');
     if (!fs.existsSync(metaPath)) return res.status(404).json({ error: 'upload not found' });
+    if (!req.body || (Buffer.isBuffer(req.body) && req.body.length === 0)) {
+      return res.status(400).json({ error: 'empty body' });
+    }
+    const data = Buffer.isBuffer(req.body) ? req.body : Buffer.from(req.body);
     const chunkPath = path.join(dir, `${chunkIndex}.part`);
-    await fs.promises.writeFile(chunkPath, req.body);
-    res.json({ ok: true });
+    await fs.promises.writeFile(chunkPath, data);
+    res.json({ ok: true, index: chunkIndex, size: data.length });
   } catch (e) {
-    res.status(500).json({ error: 'Failed to save chunk' });
+    res.status(500).json({ error: 'Failed to save chunk', detail: String(e?.message || e) });
   }
 });
 
-app.post('/api/upload/complete', requireAuth, async (req, res) => {
+app.post('/api/upload/complete', requireAuth, limiter, express.json(), async (req, res) => {
   try {
     const { uploadId } = req.body || {};
     if (!uploadId) return res.status(400).json({ error: 'uploadId required' });
