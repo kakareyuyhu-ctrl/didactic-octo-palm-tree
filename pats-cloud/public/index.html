@@ -265,6 +265,7 @@
             <div class="muted">${date}</div>
           </div>
           <div class="actions">
+            <a class="btn secondary" href="/download/${encodeURIComponent(f.name)}">Download</a>
             <button class="btn secondary" data-dl="${encodeURIComponent(f.name)}">Boost DL</button>
             <button class="btn danger">Delete</button>
           </div>
@@ -325,19 +326,26 @@
     async function acceleratedDownload(fileName, fileSize) {
       try {
         const url = `/file/${encodeURIComponent(fileName)}`;
-        const parallel = 4;
+        const parallel = Math.min(3, Math.ceil(fileSize / (2 * 1024 * 1024)) || 1);
         const chunkSize = Math.ceil(fileSize / parallel);
         const ranges = Array.from({ length: parallel }, (_, i) => ({
           start: i * chunkSize,
           end: Math.min(fileSize - 1, (i + 1) * chunkSize - 1),
         })).filter(r => r.start <= r.end);
 
-        const parts = await Promise.all(ranges.map(async (r) => {
-          const res = await fetch(url, { headers: { Range: `bytes=${r.start}-${r.end}` }, credentials: 'same-origin' });
-          if (!res.ok && res.status !== 206) throw new Error('range fetch failed');
-          const buf = await res.arrayBuffer();
-          return { start: r.start, buf };
-        }));
+        async function fetchWithRetry(r, attempts = 3) {
+          let lastErr;
+          for (let i = 0; i < attempts; i++) {
+            try {
+              const res = await fetch(url, { headers: { Range: `bytes=${r.start}-${r.end}` }, credentials: 'same-origin' });
+              if (res.status !== 206 && res.status !== 200) throw new Error('range fetch failed');
+              const buf = await res.arrayBuffer();
+              return { start: r.start, buf };
+            } catch (e) { lastErr = e; await new Promise(r => setTimeout(r, 250 * (i + 1))); }
+          }
+          throw lastErr || new Error('range fetch failed');
+        }
+        const parts = await Promise.all(ranges.map((r) => fetchWithRetry(r)));
         parts.sort((a,b) => a.start - b.start);
         const total = parts.reduce((n,p) => n + p.buf.byteLength, 0);
         const out = new Uint8Array(total);
@@ -346,12 +354,13 @@
 
         const blob = new Blob([out]);
         const a = document.createElement('a');
-        a.href = URL.createObjectURL(blob);
+        const href = URL.createObjectURL(blob);
+        a.href = href;
         a.download = fileName;
         document.body.appendChild(a);
         a.click();
         a.remove();
-        URL.revokeObjectURL(a.href);
+        setTimeout(() => URL.revokeObjectURL(href), 1000);
       } catch (e) {
         // fallback
         location.href = `/download/${encodeURIComponent(fileName)}`;
@@ -374,7 +383,7 @@
 
     async function uploadFileChunked(file) {
       const chunkSize = 8 * 1024 * 1024; // 8MB
-      const concurrency = 4; // parallel uploads
+      const concurrency = 3; // safer parallel uploads
       const totalChunks = Math.ceil(file.size / chunkSize);
       const { base: baseUp, ext: extUp, display: displayUp } = formatFilenameForMobile(file.name)
       const li = document.createElement('li');
@@ -421,12 +430,22 @@
             const start = i * chunkSize;
             const end = Math.min(file.size, start + chunkSize);
             const chunk = file.slice(start, end);
-            const res = await fetch(`/api/upload/chunk?uploadId=${encodeURIComponent(uploadId)}&index=${i}`, {
-              method: 'PUT',
-              body: chunk,
-              credentials: 'same-origin',
-            });
-            if (!res.ok) throw new Error('chunk failed');
+            async function putWithRetry(attempts = 3) {
+              let lastErr;
+              for (let k = 0; k < attempts; k++) {
+                try {
+                  const res = await fetch(`/api/upload/chunk?uploadId=${encodeURIComponent(uploadId)}&index=${i}`, {
+                    method: 'PUT',
+                    body: chunk,
+                    credentials: 'same-origin',
+                  });
+                  if (!res.ok) throw new Error('chunk failed');
+                  return;
+                } catch (e) { lastErr = e; await new Promise(r => setTimeout(r, 250 * (k + 1))); }
+              }
+              throw lastErr || new Error('chunk failed');
+            }
+            await putWithRetry();
             uploaded += chunk.size;
             const now = performance.now();
             const dt = (now - lastTime) / 1000;

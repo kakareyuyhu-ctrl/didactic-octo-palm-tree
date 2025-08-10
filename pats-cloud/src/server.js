@@ -35,7 +35,7 @@ app.use(
     contentSecurityPolicy: {
       useDefaults: true,
       directives: {
-        "default-src": ["'self'"],
+        "default-src": ["'self'", 'blob:'],
         "script-src": ["'self'", "'unsafe-inline'"],
         "style-src": ["'self'", "'unsafe-inline'"],
         "img-src": ["'self'", 'data:'],
