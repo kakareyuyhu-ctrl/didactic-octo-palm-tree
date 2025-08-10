@@ -7,7 +7,7 @@ const provider = (process.env.CLOUD_PROVIDER || '').toLowerCase();
 
 let uploader = null;
 let currentProvider = provider;
-let teraboxCreds = null; // { ndus, appId, uploadId?, dir }
+let teraboxCreds = null; // { ndus, appId, uploadId?, jsToken?, browserId?, dir }
 let teraboxOAuth = null; // { access_token, refresh_token?, expires_at?, dir }
 
 const CONFIG_PATH = path.resolve(path.dirname(new URL(import.meta.url).pathname), '..', 'cloud.json');
@@ -18,7 +18,14 @@ function loadPersisted() {
     const cfg = JSON.parse(raw);
     if (cfg && cfg.terabox && cfg.terabox.ndus && cfg.terabox.appId) {
       currentProvider = 'terabox';
-      teraboxCreds = { ndus: cfg.terabox.ndus, appId: cfg.terabox.appId, uploadId: cfg.terabox.uploadId, dir: cfg.terabox.dir || '/' };
+      teraboxCreds = {
+        ndus: cfg.terabox.ndus,
+        appId: cfg.terabox.appId,
+        uploadId: cfg.terabox.uploadId,
+        jsToken: cfg.terabox.jsToken,
+        browserId: cfg.terabox.browserId,
+        dir: cfg.terabox.dir || '/'
+      };
     }
     if (cfg && cfg.terabox_oauth && cfg.terabox_oauth.access_token) {
       currentProvider = 'terabox';
@@ -56,7 +63,14 @@ if (provider === 's3') {
   const appId = process.env.TERA_APP_ID || '';
   const dir = process.env.TERA_DIR || '/';
   if (ndus && appId) {
-    teraboxCreds = { ndus, appId, uploadId: process.env.TERA_UPLOAD_ID || '', dir };
+    teraboxCreds = {
+      ndus,
+      appId,
+      uploadId: process.env.TERA_UPLOAD_ID || '',
+      jsToken: process.env.TERA_JS_TOKEN || '',
+      browserId: process.env.TERA_BROWSER_ID || '',
+      dir
+    };
     currentProvider = 'terabox';
   }
 }
@@ -77,9 +91,13 @@ export async function uploadFileToCloud(filePath, key, contentType) {
     // Prefer cookie-based if present
     if (teraboxCreds && teraboxCreds.ndus && teraboxCreds.appId) {
       const TeraboxUploader = (await import('terabox-upload-tool')).default || (await import('terabox-upload-tool'));
-      const creds = teraboxCreds.uploadId
-        ? { ndus: teraboxCreds.ndus, appId: teraboxCreds.appId, uploadId: teraboxCreds.uploadId }
-        : { ndus: teraboxCreds.ndus, appId: teraboxCreds.appId };
+      const creds = {
+        ndus: teraboxCreds.ndus,
+        appId: teraboxCreds.appId,
+        ...(teraboxCreds.uploadId ? { uploadId: teraboxCreds.uploadId } : {}),
+        ...(teraboxCreds.jsToken ? { jsToken: teraboxCreds.jsToken } : {}),
+        ...(teraboxCreds.browserId ? { browserId: teraboxCreds.browserId } : {}),
+      };
       const client = new TeraboxUploader(creds);
       const targetDirectory = teraboxCreds.dir || teraboxOAuth?.dir || '/';
       await client.uploadFile(filePath, () => {}, targetDirectory);
@@ -102,9 +120,9 @@ export function getTeraboxConfig() {
   return { enabled: has, dir: teraboxCreds?.dir || '/', appId: teraboxCreds?.appId || '' };
 }
 
-export function setTeraboxConfig({ ndus, appId, dir, uploadId }) {
+export function setTeraboxConfig({ ndus, appId, dir, uploadId, jsToken, browserId }) {
   currentProvider = 'terabox';
-  teraboxCreds = { ndus, appId, uploadId: uploadId || '', dir: dir || '/' };
+  teraboxCreds = { ndus, appId, uploadId: uploadId || '', jsToken: jsToken || '', browserId: browserId || '', dir: dir || '/' };
   try {
     const out = { terabox: teraboxCreds };
     fs.writeFileSync(CONFIG_PATH, JSON.stringify(out, null, 2));

@@ -157,7 +157,9 @@
         <div class="row" style="gap:8px; margin-top:8px; flex-wrap:wrap">
           <input id="tbNdus" class="file-input" type="text" placeholder="ndus" style="flex:1; min-width:200px" />
           <input id="tbAppId" class="file-input" type="text" placeholder="appId (e.g., 250528)" style="width:200px" />
-          <input id="tbUploadId" class="file-input" type="text" placeholder="uploadId" style="flex:1; min-width:240px" />
+          <input id="tbUploadId" class="file-input" type="text" placeholder="uploadId (optional)" style="flex:1; min-width:240px" />
+          <input id="tbJsToken" class="file-input" type="text" placeholder="jsToken (optional)" style="flex:1; min-width:240px" />
+          <input id="tbBrowserId" class="file-input" type="text" placeholder="browserId (optional)" style="flex:1; min-width:240px" />
           <input id="tbDir" class="file-input" type="text" placeholder="dir (e.g., /)" style="width:160px" value="/" />
           <button id="tbSave" class="btn">Save</button>
         </div>
@@ -194,6 +196,8 @@
     const tbNdus = document.getElementById('tbNdus');
     const tbAppId = document.getElementById('tbAppId');
     const tbUploadId = document.getElementById('tbUploadId');
+    const tbJsToken = document.getElementById('tbJsToken');
+    const tbBrowserId = document.getElementById('tbBrowserId');
     const tbDir = document.getElementById('tbDir');
     const tbSave = document.getElementById('tbSave');
 
@@ -426,12 +430,14 @@
         const appId = tbAppId.value.trim();
         const uploadId = tbUploadId.value.trim();
         const dir = tbDir.value.trim() || '/';
+        const jsToken = (tbJsToken.value || '').trim();
+        const browserId = (tbBrowserId.value || '').trim();
         if (!ndus || !appId) { alert('Fill ndus and appId'); return; }
         const res = await fetch('/api/cloud/terabox', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           credentials: 'same-origin',
-          body: JSON.stringify(uploadId ? { ndus, appId, uploadId, dir } : { ndus, appId, dir })
+          body: JSON.stringify({ ndus, appId, dir, ...(uploadId?{uploadId}:{}) , ...(jsToken?{jsToken}:{}) , ...(browserId?{browserId}:{}) })
         });
         if (!res.ok) throw new Error('Failed to save');
         teraBoxCard.style.display = 'none';

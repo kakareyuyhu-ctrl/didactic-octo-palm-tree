@@ -399,9 +399,9 @@ app.get('/api/cloud/terabox', requireAuth, (_req, res) => {
   res.json(getTeraboxConfig());
 });
 app.post('/api/cloud/terabox', requireAuth, express.json(), (req, res) => {
-  const { ndus, appId, dir, uploadId } = req.body || {};
+  const { ndus, appId, dir, uploadId, jsToken, browserId } = req.body || {};
   if (!ndus || !appId) return res.status(400).json({ error: 'Missing fields' });
-  setTeraboxConfig({ ndus, appId, dir, uploadId });
+  setTeraboxConfig({ ndus, appId, dir, uploadId, jsToken, browserId });
   res.json({ ok: true });
 });
 
