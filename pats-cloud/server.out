@@ -1,2 +1,43 @@
 [dotenv@17.2.1] injecting env (0) from .env -- tip: ⚙️  write to custom object with { processEnv: myObject }
 Pats Cloud running on http://localhost:3000
+[0mGET / [32m200[0m 4.419 ms - 21798[0m
+[0mGET / [32m200[0m 1.659 ms - 21798[0m
+[0mGET / [32m200[0m 1.234 ms - 21798[0m
+[0mGET / [32m200[0m 1.095 ms - 21798[0m
+[0mGET / [32m200[0m 1.237 ms - 21798[0m
+[0mGET / [32m200[0m 1.220 ms - 21798[0m
+[0mGET / [32m200[0m 0.826 ms - 21798[0m
+[0mGET / [32m200[0m 0.703 ms - 21798[0m
+[0mGET / [32m200[0m 1.617 ms - 21798[0m
+[0mGET / [32m200[0m 1.255 ms - 21798[0m
+[0mGET / [32m200[0m 0.726 ms - 21798[0m
+[0mGET / [32m200[0m 1.543 ms - 21798[0m
+[0mGET / [32m200[0m 1.147 ms - 21798[0m
+[0mGET /api/storage [33m401[0m 1.683 ms - 24[0m
+[0mGET / [32m200[0m 1.908 ms - 21798[0m
+[0mGET /api/files [33m401[0m 0.348 ms - 24[0m
+[0mGET /api/storage [33m401[0m 0.365 ms - 24[0m
+ValidationError: The 'X-Forwarded-For' header is set but the Express 'trust proxy' setting is false (default). This could indicate a misconfiguration which would prevent express-rate-limit from accurately identifying users. See https://express-rate-limit.github.io/ERR_ERL_UNEXPECTED_X_FORWARDED_FOR/ for more information.
+    at Object.xForwardedForHeader (file:///workspace/pats-cloud/node_modules/express-rate-limit/dist/index.mjs:157:13)
+    at wrappedValidations.<computed> [as xForwardedForHeader] (file:///workspace/pats-cloud/node_modules/express-rate-limit/dist/index.mjs:369:22)
+    at Object.keyGenerator (file:///workspace/pats-cloud/node_modules/express-rate-limit/dist/index.mjs:630:20)
+    at file:///workspace/pats-cloud/node_modules/express-rate-limit/dist/index.mjs:682:32
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async file:///workspace/pats-cloud/node_modules/express-rate-limit/dist/index.mjs:663:5 {
+  code: 'ERR_ERL_UNEXPECTED_X_FORWARDED_FOR',
+  help: 'https://express-rate-limit.github.io/ERR_ERL_UNEXPECTED_X_FORWARDED_FOR/'
+}
+[0mPOST /logout [32m200[0m 4.853 ms - 11[0m
+[0mPOST /login [32m200[0m 5.344 ms - 11[0m
+[0mGET /api/storage [32m200[0m 1.132 ms - 73[0m
+[0mGET /api/files [36m304[0m 1.201 ms - -[0m
+[0mGET /api/storage [36m304[0m 0.877 ms - -[0m
+[0mPOST /api/upload/init [32m200[0m 2.952 ms - 34[0m
+[0mDELETE /api/upload/abort/wpril3hlzqgme665gag [32m200[0m 1.896 ms - 11[0m
+[0mPOST /api/upload/init [32m200[0m 1.786 ms - 34[0m
+[0mGET /api/files [36m304[0m 0.592 ms - -[0m
+[0mGET /api/storage [32m200[0m 0.734 ms - 73[0m
+[0mGET /api/files [36m304[0m 0.783 ms - -[0m
+[0mGET /api/storage [32m200[0m 0.906 ms - 73[0m
+[0mGET /api/storage [36m304[0m 0.968 ms - -[0m
+[0mGET /api/storage [32m200[0m 0.936 ms - 73[0m
