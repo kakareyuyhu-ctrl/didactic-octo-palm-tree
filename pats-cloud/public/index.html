@@ -69,12 +69,12 @@
 
     ul.files { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
     .file {
-      display: grid; grid-template-columns: 1fr auto; gap: 8px; align-items: center;
+      display: grid; grid-template-columns: 1fr auto; gap: 8px; align-items: start;
       padding: 10px; border-radius: 12px;
       background: linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02));
       border: 1px solid rgba(255,255,255,0.08);
     }
-    .file .meta { display: flex; gap: 10px; align-items: center; min-width: 0; }
+    .file .meta { display: flex; gap: 10px; align-items: flex-start; min-width: 0; flex-wrap: wrap; }
     .file .meta > * { line-height: 1.2; vertical-align: middle; }
     .file .name {
       display: -webkit-box;
@@ -84,9 +84,10 @@
       text-overflow: ellipsis;
       word-break: break-word;
       max-width: 100%;
+      line-height: 1.2;
     }
     .file .name .ext { color: var(--muted); }
-    .file .actions { display: flex; gap: 6px; align-items: center; }
+    .file .actions { display: flex; gap: 6px; align-items: center; align-self: start; }
 
     .upload-item { padding: 10px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1); background: var(--surface-2); }
     .progress { height: 8px; background: rgba(255,255,255,0.12); border-radius: 999px; overflow: hidden; }
