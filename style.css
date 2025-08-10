@@ -146,6 +146,9 @@ body.ready .container { animation: fadeInUp .35s ease-out both; }
 #title, #author, #canonical-wrap, #duration { word-break: break-word; }
 .foot { text-align: center; }
 
+/* Center metadata block */
+.meta .info { text-align: center; }
+.meta img { justify-self: center; }
 @media (max-width: 760px) {
   .container { padding: 20px 12px 56px; }
   h1 { font-size: 30px; }
@@ -159,6 +162,8 @@ body.ready .container { animation: fadeInUp .35s ease-out both; }
   .brand { justify-content: center; }
   .nav .tag { text-align: center; }
   .meta .info { text-align: left; }
+  .meta .info { text-align: center; }
+  .meta img { justify-self: center; }
 }
 
 @keyframes pulse { 0% { transform: translateY(0) scale(1); box-shadow: 0 6px 20px rgba(21,195,154,0.25);} 50% { transform: translateY(-1px) scale(1.015); box-shadow: 0 10px 28px rgba(21,195,154,0.33);} 100% { transform: translateY(0) scale(1); box-shadow: 0 6px 20px rgba(21,195,154,0.25);} }
