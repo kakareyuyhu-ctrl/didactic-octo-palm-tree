@@ -45,6 +45,7 @@
     .content.card { margin-top: 14px; padding: 14px; }
 
     .row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+    .right { display: flex; gap: 10px; align-items: center; justify-content: flex-end; flex-wrap: wrap; }
 
     input[type="password"], input[type="text"], .btn, .file-input {
       border-radius: 12px; border: 1px solid rgba(255,255,255,0.14);
@@ -52,7 +53,7 @@
       color: var(--text);
       padding: 12px 14px; font-size: 14px;
     }
-    .btn { background: linear-gradient(180deg, var(--primary), var(--primary-2)); border: none; color: white; cursor: pointer; }
+    .btn { background: linear-gradient(180deg, var(--primary), var(--primary-2)); border: none; color: white; cursor: pointer; line-height: 1; }
     .btn.secondary { background: linear-gradient(180deg, #303a49, #202834); }
     .btn.danger { background: linear-gradient(180deg, #f87171, #ef4444); }
     .btn:disabled { opacity: 0.6; cursor: not-allowed; }
@@ -66,13 +67,15 @@
 
     ul.files { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
     .file {
-      display: grid; grid-template-columns: 1fr auto; gap: 8px; align-items: baseline;
+      display: grid; grid-template-columns: 1fr auto; gap: 8px; align-items: center;
       padding: 10px; border-radius: 12px;
       background: linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02));
       border: 1px solid rgba(255,255,255,0.08);
     }
-    .file .meta { display: flex; gap: 10px; align-items: center; min-width: 0; }
+    .file .meta { display: flex; gap: 10px; align-items: baseline; min-width: 0; }
+    .file .meta > * { line-height: 1.2; }
     .file .name { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .file .actions { display: flex; gap: 6px; align-items: center; }
 
     .upload-item { padding: 10px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1); background: var(--surface-2); }
     .progress { height: 8px; background: rgba(255,255,255,0.12); border-radius: 999px; overflow: hidden; }
@@ -91,8 +94,8 @@
   <div class="app">
     <header class="card">
       <h1>😻 Pats Cloud</h1>
-      <div class="row" style="align-items: baseline; gap:14px">
-        <small id="storage" class="muted" style="min-width:max(160px, 30vw); text-align:right"></small>
+      <div class="right">
+        <small id="storage" class="muted" style="text-align:right"></small>
         <small id="status" class="muted">Not signed in</small>
         <button id="logoutBtn" class="btn secondary hidden">Logout</button>
       </div>
@@ -225,7 +228,7 @@
             <div class="muted">•</div>
             <div class="muted">${date}</div>
           </div>
-          <div class="row" style="gap:6px">
+          <div class="actions">
             <a class="btn secondary" href="/download/${encodeURIComponent(f.name)}">Download</a>
             <button class="btn danger">Delete</button>
           </div>
@@ -260,12 +263,12 @@
       const li = document.createElement('li');
       li.className = 'upload-item';
       li.innerHTML = `
-        <div style="display:flex; justify-content:space-between; gap:10px; align-items:center">
+        <div class="row" style="justify-content:space-between; gap:10px; align-items:baseline">
           <div class="name" style="flex:1; min-width:0">${file.name}</div>
           <div class="small">${formatBytes(file.size)}</div>
         </div>
         <div class="progress" style="margin-top:8px"><div></div></div>
-        <div class="small" style="margin-top:6px"><span class="pct">0%</span> • <span class="speed">0 MB/s</span> • <span class="eta">—</span></div>
+        <div class="small" style="margin-top:6px; display:flex; gap:8px; align-items:baseline"><span class="pct">0%</span><span>•</span><span class="speed">0 MB/s</span><span>•</span><span class="eta">—</span></div>
       `;
       uploadsList.appendChild(li);
       const bar = li.querySelector('.progress > div');
