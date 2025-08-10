@@ -26,6 +26,7 @@
                   radial-gradient(800px 600px at 120% 20%, #0b1426, transparent);
       color: var(--text);
       display: grid; place-items: center;
+      line-height: 1.3;
     }
     .app {
       width: min(960px, 100%);
@@ -53,7 +54,8 @@
       color: var(--text);
       padding: 12px 14px; font-size: 14px;
     }
-    .btn { background: linear-gradient(180deg, var(--primary), var(--primary-2)); border: none; color: white; cursor: pointer; line-height: 1; }
+    .btn { background: linear-gradient(180deg, var(--primary), var(--primary-2)); border: none; color: white; cursor: pointer; line-height: 1; display: inline-flex; align-items: center; justify-content: center; }
+    .file-input { display: inline-flex; align-items: center; justify-content: center; }
     .btn.secondary { background: linear-gradient(180deg, #303a49, #202834); }
     .btn.danger { background: linear-gradient(180deg, #f87171, #ef4444); }
     .btn:disabled { opacity: 0.6; cursor: not-allowed; }
@@ -72,15 +74,15 @@
       background: linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02));
       border: 1px solid rgba(255,255,255,0.08);
     }
-    .file .meta { display: flex; gap: 10px; align-items: baseline; min-width: 0; }
-    .file .meta > * { line-height: 1.2; }
+    .file .meta { display: flex; gap: 10px; align-items: center; min-width: 0; }
+    .file .meta > * { line-height: 1.2; vertical-align: middle; }
     .file .name { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .file .actions { display: flex; gap: 6px; align-items: center; }
 
     .upload-item { padding: 10px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1); background: var(--surface-2); }
     .progress { height: 8px; background: rgba(255,255,255,0.12); border-radius: 999px; overflow: hidden; }
     .progress > div { height: 100%; width: 0%; background: linear-gradient(90deg, var(--primary), var(--primary-2)); transition: width 0.15s ease; }
-    .small { font-size: 12px; color: var(--muted); }
+    .small { font-size: 12px; color: var(--muted); line-height: 1.2; }
 
     .spacer { flex: 1; }
     .hidden { display: none !important; }
@@ -263,12 +265,12 @@
       const li = document.createElement('li');
       li.className = 'upload-item';
       li.innerHTML = `
-        <div class="row" style="justify-content:space-between; gap:10px; align-items:baseline">
+        <div class="row" style="justify-content:space-between; gap:10px; align-items:center">
           <div class="name" style="flex:1; min-width:0">${file.name}</div>
           <div class="small">${formatBytes(file.size)}</div>
         </div>
         <div class="progress" style="margin-top:8px"><div></div></div>
-        <div class="small" style="margin-top:6px; display:flex; gap:8px; align-items:baseline"><span class="pct">0%</span><span>•</span><span class="speed">0 MB/s</span><span>•</span><span class="eta">—</span></div>
+        <div class="small" style="margin-top:6px; display:flex; gap:8px; align-items:center"><span class="pct">0%</span><span>•</span><span class="speed">0 MB/s</span><span>•</span><span class="eta">—</span></div>
       `;
       uploadsList.appendChild(li);
       const bar = li.querySelector('.progress > div');
