@@ -6,6 +6,16 @@
   <title>TikTok Downloader</title>
   <link rel="stylesheet" href="./style.css" />
   <meta name="description" content="Download TikTok videos (no key) and view details from any TikTok URL." />
+  <link rel="preconnect" href="https://www.tiktok.com" crossorigin>
+  <link rel="dns-prefetch" href="//www.tiktok.com">
+  <link rel="preconnect" href="https://www.tikwm.com" crossorigin>
+  <link rel="dns-prefetch" href="//www.tikwm.com">
+  <link rel="preconnect" href="https://api.tikmate.app" crossorigin>
+  <link rel="dns-prefetch" href="//api.tikmate.app">
+  <link rel="preconnect" href="https://tikmate.app" crossorigin>
+  <link rel="dns-prefetch" href="//tikmate.app">
+  <link rel="preconnect" href="https://r.jina.ai" crossorigin>
+  <link rel="dns-prefetch" href="//r.jina.ai">
   <script>document.addEventListener('DOMContentLoaded',()=>document.body.classList.add('ready'))</script>
 </head>
 <body>
@@ -38,9 +48,10 @@
       </div>
 
       <div class="downloads">
-        <a id="dl-nwm" class="btn success hidden" target="_blank" rel="noopener noreferrer">Download (No watermark)</a>
-        <a id="dl-wm" class="btn secondary hidden" target="_blank" rel="noopener noreferrer">Download (Watermark)</a>
-        <a id="dl-audio" class="btn secondary hidden" target="_blank" rel="noopener noreferrer">Download MP3</a>
+        <button id="dl-best" class="btn success hidden" type="button">Quick Download</button>
+        <a id="dl-nwm" class="btn success hidden" rel="noopener noreferrer">Download (No watermark)</a>
+        <a id="dl-wm" class="btn secondary hidden" rel="noopener noreferrer">Download (Watermark)</a>
+        <a id="dl-audio" class="btn secondary hidden" rel="noopener noreferrer">Download MP3</a>
       </div>
 
       <div id="embed" class="embed"></div>

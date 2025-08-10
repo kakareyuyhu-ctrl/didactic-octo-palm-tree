@@ -123,3 +123,11 @@ body.ready .container { animation: fadeInUp .35s ease-out both; }
   .meta img { max-width: 220px; justify-self: start; }
   .downloads { gap: 8px; }
 }
+
+/* Add pulse when Quick Download is ready */
+@keyframes pulse {
+  0% { transform: translateY(0) scale(1); box-shadow: 0 6px 20px rgba(21,195,154,0.25); }
+  50% { transform: translateY(-1px) scale(1.015); box-shadow: 0 10px 28px rgba(21,195,154,0.33); }
+  100% { transform: translateY(0) scale(1); box-shadow: 0 6px 20px rgba(21,195,154,0.25); }
+}
+#dl-best.attention { animation: pulse 1.1s ease-in-out infinite; }
