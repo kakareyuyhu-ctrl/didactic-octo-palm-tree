@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>NovaTok — Ultra‑fast TikTok Downloader</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
+  <link rel="stylesheet" href="./style.css" />
+  <meta name="description" content="NovaTok is a premium, ultra‑fast TikTok downloader with smart fallbacks and no API keys required." />
+  <link rel="preconnect" href="https://www.tiktok.com" crossorigin>
+  <link rel="dns-prefetch" href="//www.tiktok.com">
+  <link rel="preload" href="https://www.tiktok.com/embed.js" as="script" crossorigin>
+  <link rel="preconnect" href="https://www.tikwm.com" crossorigin>
+  <link rel="dns-prefetch" href="//www.tikwm.com">
+  <link rel="preconnect" href="https://api.tikmate.app" crossorigin>
+  <link rel="dns-prefetch" href="//api.tikmate.app">
+  <link rel="preconnect" href="https://tikmate.app" crossorigin>
+  <link rel="dns-prefetch" href="//tikmate.app">
+  <link rel="preconnect" href="https://r.jina.ai" crossorigin>
+  <link rel="dns-prefetch" href="//r.jina.ai">
+  <script>document.addEventListener('DOMContentLoaded',()=>document.body.classList.add('ready'))</script>
+</head>
+<body>
+  <header class="nav">
+    <div class="brand">
+      <img src="./favicon.svg" alt="NovaTok logo" width="24" height="24" />
+      <span class="brand-name">NovaTok</span>
+    </div>
+    <div class="tag">Ultra‑fast. No keys. Smart fallbacks.</div>
+  </header>
+
+  <main class="container">
+    <h1>NovaTok</h1>
+    <p class="sub">Download TikTok videos instantly in premium quality — no watermark, watermark, or MP3. Paste a link and go.</p>
+    <form id="lookup-form" autocomplete="off" novalidate>
+      <label for="url-input">Paste TikTok URL</label>
+      <div class="input-row">
+        <input id="url-input" type="url" inputmode="url" placeholder="https://www.tiktok.com/@user/video/123456789" required aria-required="true" />
+        <button type="submit" class="btn" aria-label="Fetch video details">Fetch</button>
+      </div>
+      <p class="help">Works with: <span class="mono">tiktok.com</span>, <span class="mono">m.tiktok.com</span>, <span class="mono">vm.tiktok.com</span>, <span class="mono">vt.tiktok.com</span>.</p>
+    </form>
+
+    <section id="status" class="status" role="status" aria-live="polite"></section>
+
+    <section id="result" class="result" aria-labelledby="title" hidden>
+      <div class="meta">
+        <img id="thumb" alt="Video thumbnail" />
+        <div class="info">
+          <h2 id="title" class="title"></h2>
+          <p id="author" class="author"></p>
+          <p id="canonical-wrap" class="mono small"></p>
+          <p id="duration" class="small"></p>
+          <div class="actions">
+            <a id="open-btn" target="_blank" rel="noopener noreferrer" class="btn">Open video</a>
+            <button id="copy-btn" type="button" class="btn secondary">Copy share link</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="downloads">
+        <button id="dl-best" class="btn success hidden" type="button" aria-label="Quick download best quality">Quick Download</button>
+        <button id="dl-nwm-btn" class="btn success hidden" type="button" aria-label="Download no watermark">No watermark</button>
+        <button id="dl-wm-btn" class="btn secondary hidden" type="button" aria-label="Download with watermark">Watermark</button>
+        <button id="dl-audio-btn" class="btn secondary hidden" type="button" aria-label="Download MP3">MP3</button>
+        <a id="dl-nwm" class="hidden" rel="noopener noreferrer">nwm</a>
+        <a id="dl-wm" class="hidden" rel="noopener noreferrer">wm</a>
+        <a id="dl-audio" class="hidden" rel="noopener noreferrer">mp3</a>
+      </div>
+
+      <div id="embed" class="embed"></div>
+    </section>
+
+    <footer class="foot">
+      <p>Respect creators' rights. Only download content you have permission to use.</p>
+    </footer>
+  </main>
+
+  <script src="./script.js" defer></script>
+</body>
+</html>
