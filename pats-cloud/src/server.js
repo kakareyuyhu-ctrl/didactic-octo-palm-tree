@@ -195,8 +195,18 @@ app.get('/api/files', requireAuth, async (req, res) => {
 });
 
 app.post('/api/upload', requireAuth, upload.array('files', 20), (req, res) => {
-  const uploaded = (req.files || []).map((f) => ({ name: path.basename(f.filename), size: f.size }));
-  res.json({ ok: true, uploaded });
+  const uploaded = (req.files || []).map((f) => ({ name: path.basename(f.filename), size: f.size, path: f.path, mimetype: f.mimetype }));
+  // Background cloud mirror for each file
+  if (isCloudConfigured()) {
+    const dir = resolveFolderDir(req.query.folder);
+    for (const f of uploaded) {
+      const fullPath = path.join(dir, f.name);
+      const key = path.posix.join(cloudPrefix, (req.query.folder ? String(req.query.folder) : ''), f.name).replace(/\\/g, '/');
+      const type = f.mimetype || 'application/octet-stream';
+      uploadFileToCloud(fullPath, key, type).catch(() => {});
+    }
+  }
+  res.json({ ok: true, uploaded: uploaded.map(({ path, mimetype, ...rest }) => rest), mirrored: isCloudConfigured() });
 });
 
 app.get('/download/:name', requireAuth, async (req, res) => {
