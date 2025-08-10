@@ -426,12 +426,12 @@
         const appId = tbAppId.value.trim();
         const uploadId = tbUploadId.value.trim();
         const dir = tbDir.value.trim() || '/';
-        if (!ndus || !appId || !uploadId) { alert('Fill ndus, appId, uploadId'); return; }
+        if (!ndus || !appId) { alert('Fill ndus and appId'); return; }
         const res = await fetch('/api/cloud/terabox', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           credentials: 'same-origin',
-          body: JSON.stringify({ ndus, appId, uploadId, dir })
+          body: JSON.stringify(uploadId ? { ndus, appId, uploadId, dir } : { ndus, appId, dir })
         });
         if (!res.ok) throw new Error('Failed to save');
         teraBoxCard.style.display = 'none';
