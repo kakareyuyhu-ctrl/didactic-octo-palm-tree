@@ -353,18 +353,18 @@ app.post('/api/upload/complete', requireAuth, limiter, express.json(), async (re
 
     const stat = await fs.promises.stat(outPath);
     // Background cloud mirror
-    if (enableCloudMirror && isCloudConfigured()) {
+    if (isCloudConfigured()) {
       const key = path.posix.join(cloudPrefix, (meta.folder || ''), path.basename(outPath)).replace(/\\/g, '/');
       uploadFileToCloud(outPath, key, mime.lookup(outPath) || 'application/octet-stream').catch(() => {});
     }
-    res.json({ ok: true, file: { name: path.basename(outPath), size: stat.size }, mirrored: enableCloudMirror && isCloudConfigured() });
+    res.json({ ok: true, file: { name: path.basename(outPath), size: stat.size }, mirrored: isCloudConfigured() });
   } catch (e) {
     res.status(500).json({ error: 'Failed to complete upload' });
   }
 });
 
 app.get('/api/cloud/status', requireAuth, (_req, res) => {
-  res.json({ enabled: enableCloudMirror && isCloudConfigured() });
+  res.json({ enabled: isCloudConfigured() });
 });
 
 // TeraBox config endpoints (optional)
