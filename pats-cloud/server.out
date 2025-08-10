@@ -1,0 +1,3 @@
+[dotenv@17.2.1] injecting env (0) from .env -- tip: 📡 observe env with Radar: https://dotenvx.com/radar
+Pats Cloud running on http://localhost:3000
+[0mGET / [32m200[0m 3.524 ms - 9183[0m
