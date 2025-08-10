@@ -377,8 +377,20 @@
     async function uploadFiles(files) {
       if (!files?.length) return;
       for (const file of files) {
-        void uploadFileChunked(file);
+        try {
+          await uploadFileSequential(file);
+        } catch {
+          void uploadFileChunked(file);
+        }
       }
+    }
+
+    async function uploadFileSequential(file) {
+      const form = new FormData();
+      form.append('files', file);
+      const res = await fetch('/api/upload', { method: 'POST', body: form, credentials: 'same-origin' });
+      if (!res.ok) throw new Error('sequential failed');
+      await loadFiles();
     }
 
     async function uploadFileChunked(file, opts) {

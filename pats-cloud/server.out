@@ -41,3 +41,4 @@ ValidationError: The 'X-Forwarded-For' header is set but the Express 'trust prox
 [0mGET /api/storage [32m200[0m 0.906 ms - 73[0m
 [0mGET /api/storage [36m304[0m 0.968 ms - -[0m
 [0mGET /api/storage [32m200[0m 0.936 ms - 73[0m
+[0mGET /api/storage [32m200[0m 0.949 ms - 73[0m
