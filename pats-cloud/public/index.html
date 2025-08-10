@@ -386,11 +386,72 @@
     }
 
     async function uploadFileSequential(file) {
-      const form = new FormData();
-      form.append('files', file);
-      const res = await fetch('/api/upload', { method: 'POST', body: form, credentials: 'same-origin' });
-      if (!res.ok) throw new Error('sequential failed');
-      await loadFiles();
+      const { base: baseUp, ext: extUp, display: displayUp } = formatFilenameForMobile(file.name);
+      const li = document.createElement('li');
+      li.className = 'upload-item';
+      li.innerHTML = `
+        <div class="row" style="justify-content:space-between; gap:10px; align-items:center">
+          <div class="name filename" style="flex:1; min-width:0" data-full="${escapeHtml(file.name)}" data-base="${escapeHtml(baseUp)}" data-ext="${escapeHtml(extUp)}" title="${escapeHtml(file.name)}">${displayUp}</div>
+          <div class="small">${formatBytes(file.size)}</div>
+        </div>
+        <div class="progress" style="margin-top:8px"><div></div></div>
+        <div class="small" style="margin-top:6px; display:flex; gap:8px; align-items:center"><span class="pct">0%</span><span>•</span><span class="speed">0 MB/s</span><span>•</span><span class="eta">—</span></div>
+      `;
+      uploadsList.appendChild(li);
+      li.querySelector('.filename')?.addEventListener('click', toggleFilenameExpand);
+      const bar = li.querySelector('.progress > div');
+      const pctEl = li.querySelector('.pct');
+      const speedEl = li.querySelector('.speed');
+      const etaEl = li.querySelector('.eta');
+
+      return new Promise((resolve, reject) => {
+        const xhr = new XMLHttpRequest();
+        xhr.open('POST', '/api/upload', true);
+        xhr.withCredentials = true;
+        const form = new FormData();
+        form.append('files', file);
+        const t0 = performance.now();
+        let lastTime = t0;
+        let lastLoaded = 0;
+        xhr.upload.onprogress = (e) => {
+          const loaded = e.loaded;
+          const now = performance.now();
+          const dt = (now - lastTime) / 1000;
+          if (dt >= 0.3) {
+            const ds = loaded - lastLoaded;
+            const speed = ds / dt; // bytes/s
+            speedEl.textContent = `${(speed / (1024*1024)).toFixed(2)} MB/s`;
+            const remaining = file.size - loaded;
+            const eta = speed > 0 ? remaining / speed : 0;
+            etaEl.textContent = eta ? `${Math.ceil(eta)}s left` : '—';
+            lastTime = now;
+            lastLoaded = loaded;
+          }
+          const p = Math.round((loaded / file.size) * 100);
+          bar.style.width = `${p}%`;
+          pctEl.textContent = `${p}%`;
+        };
+        xhr.onload = async () => {
+          if (xhr.status >= 200 && xhr.status < 300) {
+            bar.style.width = '100%';
+            pctEl.textContent = '100%';
+            etaEl.textContent = 'Done';
+            try { await loadFiles(); } catch {}
+            setTimeout(() => li.remove(), 1200);
+            resolve();
+          } else {
+            li.querySelector('.name').textContent += ' — failed';
+            bar.style.background = 'linear-gradient(180deg, #f87171, #ef4444)';
+            reject(new Error('sequential failed'));
+          }
+        };
+        xhr.onerror = () => {
+          li.querySelector('.name').textContent += ' — failed';
+          bar.style.background = 'linear-gradient(180deg, #f87171, #ef4444)';
+          reject(new Error('sequential failed'));
+        };
+        xhr.send(form);
+      });
     }
 
     async function uploadFileChunked(file, opts) {

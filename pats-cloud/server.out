@@ -65,3 +65,12 @@ ValidationError: The 'X-Forwarded-For' header is set but the Express 'trust prox
 [0mGET /api/storage [32m200[0m 0.803 ms - 73[0m
 [0mGET /api/storage [36m304[0m 0.662 ms - -[0m
 [0mGET /api/storage [32m200[0m 0.822 ms - 73[0m
+[0mGET /api/files [36m304[0m 0.985 ms - -[0m
+[0mGET /api/storage [32m200[0m 0.987 ms - 73[0m
+[0mGET /api/storage [32m200[0m 0.866 ms - 73[0m
+[0mPOST /api/upload [32m200[0m 23.661 ms - 97[0m
+[0mGET /api/files [32m200[0m 0.585 ms - 116[0m
+[0mGET /api/storage [32m200[0m 1.153 ms - 77[0m
+[0mGET /file/Hwhdjjs-cursor-build-patshi-admin-panel-1f62.zip [32m206[0m 1.996 ms - 21421[0m
+[0mGET /api/storage [36m304[0m 1.374 ms - -[0m
+[0mGET /api/storage [32m200[0m 1.399 ms - 77[0m
