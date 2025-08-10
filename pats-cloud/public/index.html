@@ -381,9 +381,10 @@
       }
     }
 
-    async function uploadFileChunked(file) {
-      const chunkSize = 8 * 1024 * 1024; // 8MB
-      const concurrency = 3; // safer parallel uploads
+    async function uploadFileChunked(file, opts) {
+      const chunkSize = opts?.chunkSize ?? 2 * 1024 * 1024; // default 2MB
+      const concurrency = opts?.concurrency ?? 2; // default parallel 2
+      const attempt = opts?.attempt ?? 1;
       const totalChunks = Math.ceil(file.size / chunkSize);
       const { base: baseUp, ext: extUp, display: displayUp } = formatFilenameForMobile(file.name)
       const li = document.createElement('li');
@@ -407,6 +408,9 @@
       let uploaded = 0;
       let lastTime = t0;
       let lastUploaded = 0;
+      let uploadId = '';
+      const controller = new AbortController();
+      let failed = false;
 
       try {
         const initRes = await fetch('/api/upload/init', {
@@ -416,7 +420,7 @@
           body: JSON.stringify({ filename: file.name, size: file.size, chunkSize, totalChunks }),
         });
         if (!initRes.ok) throw new Error('init failed');
-        const { uploadId } = await initRes.json();
+        ({ uploadId } = await initRes.json());
 
         const nextIndex = (() => {
           let idx = 0;
@@ -425,6 +429,7 @@
 
         async function uploadOne() {
           while (true) {
+            if (controller.signal.aborted || failed) break;
             const i = nextIndex();
             if (i === -1) break;
             const start = i * chunkSize;
@@ -434,10 +439,12 @@
               let lastErr;
               for (let k = 0; k < attempts; k++) {
                 try {
+                  if (controller.signal.aborted) throw new Error('aborted');
                   const res = await fetch(`/api/upload/chunk?uploadId=${encodeURIComponent(uploadId)}&index=${i}`, {
                     method: 'PUT',
                     body: chunk,
                     credentials: 'same-origin',
+                    signal: controller.signal,
                   });
                   if (!res.ok) throw new Error('chunk failed');
                   return;
@@ -479,8 +486,15 @@
         pctEl.textContent = '100%';
         etaEl.textContent = 'Done';
       } catch (e) {
+        failed = true;
+        controller.abort();
+        // Fallback once with safer settings
+        if (attempt === 1) {
+          try { if (uploadId) await fetch(`/api/upload/abort/${encodeURIComponent(uploadId)}`, { method: 'DELETE', credentials: 'same-origin' }); } catch {}
+          return uploadFileChunked(file, { chunkSize: 1 * 1024 * 1024, concurrency: 1, attempt: 2 });
+        }
         li.querySelector('.name').textContent += ' — failed';
-        bar.style.background = 'linear-gradient(90deg, #f87171, #ef4444)';
+        bar.style.background = 'linear-gradient(180deg, #f87171, #ef4444)';
       } finally {
         await loadFiles();
         setTimeout(() => li.remove(), 1500);
