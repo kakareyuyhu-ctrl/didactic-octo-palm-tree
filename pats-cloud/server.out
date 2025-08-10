@@ -73,3 +73,12 @@ Pats Cloud running on http://localhost:3000
 [0mGET /file/com-f1player-1130501-56198158-773497235cbdfceba8b312dc85a627c5.apk?folder=My_Folder_1 [32m206[0m 2.446 ms - 238421270[0m
 [0mGET /file/com-f1player-1130501-56198158-773497235cbdfceba8b312dc85a627c5.apk?folder=My_Folder_1 [32m206[0m 1.492 ms - 238421269[0m
 [0mGET /file/com-f1player-1130501-56198158-773497235cbdfceba8b312dc85a627c5.apk?folder=My_Folder_1 [32m206[0m 2.524 ms - 238421270[0m
+[0mGET /api/storage [32m200[0m 2.081 ms - 81[0m
+[0mGET /api/files [36m304[0m 1.087 ms - -[0m
+[0mGET /api/storage [36m304[0m 1.452 ms - -[0m
+[0mGET /api/files [36m304[0m 0.852 ms - -[0m
+[0mGET /api/storage [36m304[0m 1.599 ms - -[0m
+[0mGET /api/files?folder=My_Folder_1 [36m304[0m 1.458 ms - -[0m
+[0mGET /api/storage [36m304[0m 0.772 ms - -[0m
+[0mDELETE /api/files/com-f1player-1130501-56198158-773497235cbdfceba8b312dc85a627c5.apk?folder=My_Folder_1 [32m200[0m 1.181 ms - 11[0m
+[0mGET /api/files?folder=My_Folder_1 [32m200[0m 0.797 ms - 35[0m
