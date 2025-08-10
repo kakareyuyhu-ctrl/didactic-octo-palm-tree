@@ -373,11 +373,12 @@
     }
 
     async function uploadFileChunked(file) {
-      const chunkSize = 5 * 1024 * 1024; // 5MB
+      const chunkSize = 8 * 1024 * 1024; // 8MB
+      const concurrency = 4; // parallel uploads
       const totalChunks = Math.ceil(file.size / chunkSize);
+      const { base: baseUp, ext: extUp, display: displayUp } = formatFilenameForMobile(file.name)
       const li = document.createElement('li');
       li.className = 'upload-item';
-      const { base: baseUp, ext: extUp, display: displayUp } = formatFilenameForMobile(file.name)
       li.innerHTML = `
         <div class="row" style="justify-content:space-between; gap:10px; align-items:center">
           <div class="name filename" style="flex:1; min-width:0" data-full="${escapeHtml(file.name)}" data-base="${escapeHtml(baseUp)}" data-ext="${escapeHtml(extUp)}" title="${escapeHtml(file.name)}">${displayUp}</div>
@@ -408,35 +409,45 @@
         if (!initRes.ok) throw new Error('init failed');
         const { uploadId } = await initRes.json();
 
-        for (let i = 0; i < totalChunks; i++) {
-          const start = i * chunkSize;
-          const end = Math.min(file.size, start + chunkSize);
-          const chunk = file.slice(start, end);
+        const nextIndex = (() => {
+          let idx = 0;
+          return () => (idx < totalChunks ? idx++ : -1);
+        })();
 
-          const res = await fetch(`/api/upload/chunk?uploadId=${encodeURIComponent(uploadId)}&index=${i}` , {
-            method: 'PUT',
-            body: chunk,
-            credentials: 'same-origin',
-          });
-          if (!res.ok) throw new Error('chunk failed');
-
-          uploaded += chunk.size;
-          const now = performance.now();
-          const dt = (now - lastTime) / 1000;
-          if (dt >= 0.3) {
-            const ds = uploaded - lastUploaded;
-            const speed = ds / dt; // bytes/s
-            speedEl.textContent = `${(speed / (1024*1024)).toFixed(2)} MB/s`;
-            const remaining = file.size - uploaded;
-            const eta = speed > 0 ? remaining / speed : 0;
-            etaEl.textContent = eta ? `${Math.ceil(eta)}s left` : '—';
-            lastTime = now;
-            lastUploaded = uploaded;
+        async function uploadOne() {
+          while (true) {
+            const i = nextIndex();
+            if (i === -1) break;
+            const start = i * chunkSize;
+            const end = Math.min(file.size, start + chunkSize);
+            const chunk = file.slice(start, end);
+            const res = await fetch(`/api/upload/chunk?uploadId=${encodeURIComponent(uploadId)}&index=${i}`, {
+              method: 'PUT',
+              body: chunk,
+              credentials: 'same-origin',
+            });
+            if (!res.ok) throw new Error('chunk failed');
+            uploaded += chunk.size;
+            const now = performance.now();
+            const dt = (now - lastTime) / 1000;
+            if (dt >= 0.3) {
+              const ds = uploaded - lastUploaded;
+              const speed = ds / dt; // bytes/s
+              speedEl.textContent = `${(speed / (1024*1024)).toFixed(2)} MB/s`;
+              const remaining = file.size - uploaded;
+              const eta = speed > 0 ? remaining / speed : 0;
+              etaEl.textContent = eta ? `${Math.ceil(eta)}s left` : '—';
+              lastTime = now;
+              lastUploaded = uploaded;
+            }
+            const p = Math.round((uploaded / file.size) * 100);
+            bar.style.width = `${p}%`;
+            pctEl.textContent = `${p}%`;
           }
-          const p = Math.round((uploaded / file.size) * 100);
-          bar.style.width = `${p}%`;
-          pctEl.textContent = `${p}%`;
         }
+
+        const workers = Array.from({ length: Math.min(concurrency, totalChunks) }, uploadOne);
+        await Promise.all(workers.map((fn) => fn()));
 
         const fin = await fetch('/api/upload/complete', {
           method: 'POST',

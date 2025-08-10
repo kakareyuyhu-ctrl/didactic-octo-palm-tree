@@ -100,3 +100,17 @@ Pats Cloud running on http://localhost:3000
 [0mGET /api/storage [32m200[0m 0.577 ms - 73[0m
 [0mPUT /api/upload/chunk?uploadId=fxeyf7cs5wtme65t5sc&index=12 [32m200[0m 857.671 ms - 37[0m
 [0mPUT /api/upload/chunk?uploadId=fxeyf7cs5wtme65t5sc&index=13 [32m200[0m 927.317 ms - 37[0m
+[0mPUT /api/upload/chunk?uploadId=fxeyf7cs5wtme65t5sc&index=14 [32m200[0m 863.024 ms - 37[0m
+[0mPUT /api/upload/chunk?uploadId=fxeyf7cs5wtme65t5sc&index=15 [32m200[0m 848.217 ms - 37[0m
+[0mGET /api/storage [32m200[0m 0.515 ms - 73[0m
+[0mPUT /api/upload/chunk?uploadId=fxeyf7cs5wtme65t5sc&index=16 [32m200[0m 1178.163 ms - 37[0m
+[0mPUT /api/upload/chunk?uploadId=fxeyf7cs5wtme65t5sc&index=17 [32m200[0m 992.862 ms - 37[0m
+[0mPUT /api/upload/chunk?uploadId=fxeyf7cs5wtme65t5sc&index=18 [32m200[0m 1258.236 ms - 37[0m
+[0mPUT /api/upload/chunk?uploadId=fxeyf7cs5wtme65t5sc&index=19 [32m200[0m 925.733 ms - 37[0m
+[0mGET /api/storage [32m200[0m 0.751 ms - 73[0m
+[0mPUT /api/upload/chunk?uploadId=fxeyf7cs5wtme65t5sc&index=20 [32m200[0m 2221.719 ms - 37[0m
+[0mPUT /api/upload/chunk?uploadId=fxeyf7cs5wtme65t5sc&index=21 [32m200[0m 846.378 ms - 37[0m
+[0mPUT /api/upload/chunk?uploadId=fxeyf7cs5wtme65t5sc&index=22 [32m200[0m 992.737 ms - 37[0m
+[0mPUT /api/upload/chunk?uploadId=fxeyf7cs5wtme65t5sc&index=23 [32m200[0m 818.246 ms - 37[0m
+[0mGET /api/storage [32m200[0m 0.822 ms - 73[0m
+[0mPUT /api/upload/chunk?uploadId=fxeyf7cs5wtme65t5sc&index=24 [32m200[0m 925.988 ms - 37[0m
