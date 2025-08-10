@@ -104,6 +104,8 @@
       header h1 { font-size: 18px; }
       .btn { padding: 10px 12px; font-size: 13px; }
       .file .meta { gap: 6px; }
+      .file { grid-template-columns: 1fr; }
+      .actions { justify-content: flex-start; }
     }
   </style>
 </head>
@@ -254,12 +256,10 @@
         li.className = 'file';
         const sizeLabel = formatBytes(f.size);
         const date = new Date(f.modifiedAt).toLocaleString();
-        const dot = f.name.lastIndexOf('.');
-        const base = dot > 0 ? f.name.slice(0, dot) : f.name;
-        const ext = dot > 0 ? f.name.slice(dot) : '';
+        const { base, ext, display } = formatFilenameForMobile(f.name);
         li.innerHTML = `
           <div class="meta">
-            <div class="name" title="${f.name}"><span class="base">${base}</span><span class="ext">${ext}</span></div>
+            <div class="name filename" data-full="${escapeHtml(f.name)}" data-base="${escapeHtml(base)}" data-ext="${escapeHtml(ext)}" title="${escapeHtml(f.name)}">${display}</div>
             <div class="muted">${sizeLabel}</div>
             <div class="muted">•</div>
             <div class="muted">${date}</div>
@@ -276,8 +276,44 @@
           await loadFiles();
         });
         li.querySelector('[data-dl]')?.addEventListener('click', () => acceleratedDownload(f.name, f.size));
+        li.querySelector('.filename')?.addEventListener('click', toggleFilenameExpand);
         fileList.appendChild(li);
       }
+    }
+    function toggleFilenameExpand(e) {
+      const el = e.currentTarget;
+      const full = el.getAttribute('data-full');
+      const base = el.getAttribute('data-base');
+      const ext = el.getAttribute('data-ext');
+      const expanded = el.getAttribute('data-expanded') === '1';
+      if (expanded) {
+        const { display } = formatFilenameForMobile(full);
+        el.innerHTML = display;
+        el.setAttribute('data-expanded', '0');
+      } else {
+        el.innerHTML = `<span class="base">${base}</span><span class="ext">${ext}</span>`;
+        el.setAttribute('data-expanded', '1');
+      }
+    }
+
+    function escapeHtml(s) {
+      return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;','\'':'&#39;'}[c]));
+    }
+
+    function formatFilenameForMobile(name) {
+      const dot = name.lastIndexOf('.');
+      const base = dot > 0 ? name.slice(0, dot) : name;
+      const ext = dot > 0 ? name.slice(dot) : '';
+      const max = (typeof window !== 'undefined' && window.innerWidth) ? (window.innerWidth < 360 ? 16 : window.innerWidth < 420 ? 22 : 28) : 22;
+      const soft = base.replace(/([._-])/g, '$1\u200b');
+      let shown = soft;
+      if (base.length > max) {
+        const head = base.slice(0, Math.ceil(max * 0.6));
+        const tail = base.slice(-Math.floor(max * 0.3));
+        shown = `${head}…${tail}`.replace(/([._-])/g, '$1\u200b');
+      }
+      const display = `<span class="base">${escapeHtml(shown)}</span><span class="ext">${escapeHtml(ext)}</span>`;
+      return { base, ext, display };
     }
     tabs.addEventListener('click', (e) => {
       const btn = e.target.closest('button[data-sort]');
@@ -341,18 +377,17 @@
       const totalChunks = Math.ceil(file.size / chunkSize);
       const li = document.createElement('li');
       li.className = 'upload-item';
-      const dotUp = file.name.lastIndexOf('.')
-      const baseUp = dotUp > 0 ? file.name.slice(0, dotUp) : file.name
-      const extUp = dotUp > 0 ? file.name.slice(dotUp) : ''
+      const { base: baseUp, ext: extUp, display: displayUp } = formatFilenameForMobile(file.name)
       li.innerHTML = `
         <div class="row" style="justify-content:space-between; gap:10px; align-items:center">
-          <div class="name" style="flex:1; min-width:0" title="${file.name}"><span class="base">${baseUp}</span><span class="ext">${extUp}</span></div>
+          <div class="name filename" style="flex:1; min-width:0" data-full="${escapeHtml(file.name)}" data-base="${escapeHtml(baseUp)}" data-ext="${escapeHtml(extUp)}" title="${escapeHtml(file.name)}">${displayUp}</div>
           <div class="small">${formatBytes(file.size)}</div>
         </div>
         <div class="progress" style="margin-top:8px"><div></div></div>
         <div class="small" style="margin-top:6px; display:flex; gap:8px; align-items:center"><span class="pct">0%</span><span>•</span><span class="speed">0 MB/s</span><span>•</span><span class="eta">—</span></div>
       `;
       uploadsList.appendChild(li);
+      li.querySelector('.filename')?.addEventListener('click', toggleFilenameExpand);
       const bar = li.querySelector('.progress > div');
       const pctEl = li.querySelector('.pct');
       const speedEl = li.querySelector('.speed');
