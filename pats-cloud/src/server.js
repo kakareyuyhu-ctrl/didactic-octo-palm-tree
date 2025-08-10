@@ -9,6 +9,7 @@ import { fileURLToPath } from 'url';
 import dotenv from 'dotenv';
 import crypto from 'crypto';
 import rateLimit from 'express-rate-limit';
+import { execFile } from 'child_process';
 
 dotenv.config();
 
@@ -102,15 +103,26 @@ function sanitizeFilename(name) {
   return name.replace(/[^a-zA-Z0-9._-]/g, '_');
 }
 
+function getCollisionSafeName(directory, desiredName) {
+  const parsed = path.parse(desiredName);
+  const base = sanitizeFilename(parsed.name);
+  const ext = parsed.ext.toLowerCase();
+  let candidate = `${base}${ext}`;
+  let counter = 0;
+  while (fs.existsSync(path.join(directory, candidate))) {
+    counter += 1;
+    candidate = `${base}(${counter})${ext}`;
+  }
+  return candidate;
+}
+
 const storage = multer.diskStorage({
   destination: (_req, _file, cb) => {
     cb(null, UPLOAD_DIR);
   },
   filename: (_req, file, cb) => {
-    const base = path.parse(file.originalname).name;
-    const ext = path.parse(file.originalname).ext;
-    const safe = sanitizeFilename(base) + ext.toLowerCase();
-    cb(null, `${Date.now()}_${safe}`);
+    const unique = getCollisionSafeName(UPLOAD_DIR, file.originalname);
+    cb(null, unique);
   },
 });
 
@@ -227,7 +239,7 @@ app.post('/api/upload/complete', requireAuth, limiter, express.json(), async (re
     const metaPath = path.join(dir, 'meta.json');
     if (!fs.existsSync(metaPath)) return res.status(404).json({ error: 'upload not found' });
     const meta = JSON.parse(await fs.promises.readFile(metaPath, 'utf8'));
-    const safeOutName = `${Date.now()}_${meta.filename}`;
+    const safeOutName = getCollisionSafeName(UPLOAD_DIR, meta.filename);
     const outPath = path.join(UPLOAD_DIR, safeOutName);
 
     const writeStream = fs.createWriteStream(outPath, { flags: 'w' });
@@ -271,6 +283,59 @@ app.delete('/api/upload/abort/:uploadId', requireAuth, async (req, res) => {
     res.json({ ok: true });
   } catch {
     res.json({ ok: true });
+  }
+});
+
+async function getFsTotals(targetPath) {
+  if (fs.promises.statfs) {
+    try {
+      const stats = await fs.promises.statfs(targetPath);
+      const total = BigInt(stats.bsize) * BigInt(stats.blocks);
+      const free = BigInt(stats.bsize) * BigInt(stats.bavail);
+      return { total: Number(total), free: Number(free) };
+    } catch {}
+  }
+  // Fallback to df
+  try {
+    const output = await new Promise((resolve, reject) => {
+      execFile('df', ['-Pk', targetPath], (err, stdout) => {
+        if (err) return reject(err);
+        resolve(stdout);
+      });
+    });
+    const lines = String(output).trim().split(/\r?\n/);
+    if (lines.length >= 2) {
+      const parts = lines[1].trim().split(/\s+/);
+      const totalK = Number(parts[1]);
+      const availK = Number(parts[3]);
+      return { total: totalK * 1024, free: availK * 1024 };
+    }
+  } catch {}
+  return { total: 0, free: 0 };
+}
+
+async function getUploadsUsedBytes() {
+  const entries = await fs.promises.readdir(UPLOAD_DIR, { withFileTypes: true });
+  let total = 0;
+  for (const entry of entries) {
+    if (entry.name === '.chunks') continue;
+    if (entry.isFile()) {
+      const stat = await fs.promises.stat(path.join(UPLOAD_DIR, entry.name));
+      total += stat.size;
+    }
+  }
+  return total;
+}
+
+app.get('/api/storage', requireAuth, async (_req, res) => {
+  try {
+    const [{ total, free }, usedUploads] = await Promise.all([
+      getFsTotals(UPLOAD_DIR),
+      getUploadsUsedBytes(),
+    ]);
+    res.json({ totalBytes: total, freeBytes: free, usedBytesUploads: usedUploads });
+  } catch (e) {
+    res.status(500).json({ error: 'Failed to get storage info' });
   }
 });
 

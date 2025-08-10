@@ -66,7 +66,7 @@
 
     ul.files { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
     .file {
-      display: grid; grid-template-columns: 1fr auto; gap: 8px; align-items: center;
+      display: grid; grid-template-columns: 1fr auto; gap: 8px; align-items: baseline;
       padding: 10px; border-radius: 12px;
       background: linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02));
       border: 1px solid rgba(255,255,255,0.08);
@@ -91,7 +91,8 @@
   <div class="app">
     <header class="card">
       <h1>😻 Pats Cloud</h1>
-      <div class="row">
+      <div class="row" style="align-items: baseline; gap:14px">
+        <small id="storage" class="muted" style="min-width:max(160px, 30vw); text-align:right"></small>
         <small id="status" class="muted">Not signed in</small>
         <button id="logoutBtn" class="btn secondary hidden">Logout</button>
       </div>
@@ -130,6 +131,7 @@
     const loginView = document.getElementById('loginView');
     const appView = document.getElementById('appView');
     const statusEl = document.getElementById('status');
+    const storageEl = document.getElementById('storage');
     const logoutBtn = document.getElementById('logoutBtn');
     const loginBtn = document.getElementById('loginBtn');
     const passwordEl = document.getElementById('password');
@@ -160,6 +162,7 @@
       appView.classList.toggle('hidden', !v);
       logoutBtn.classList.toggle('hidden', !v);
       statusEl.textContent = v ? 'Signed in' : 'Not signed in';
+      if (v) loadStorage(); else storageEl.textContent = '';
     }
 
     loginBtn.addEventListener('click', async () => {
@@ -184,8 +187,23 @@
       try {
         const data = await api('/api/files');
         renderFiles(data.files || []);
+        await loadStorage();
       } catch (e) {
         fileList.innerHTML = '<li class="muted">Sign in to view files</li>';
+      }
+    }
+
+    async function loadStorage() {
+      try {
+        const s = await api('/api/storage');
+        if (s && typeof s.totalBytes === 'number') {
+          const used = s.usedBytesUploads || 0;
+          const free = s.freeBytes || 0;
+          const total = s.totalBytes || 0;
+          storageEl.textContent = `Storage: ${formatBytes(used)} used • ${formatBytes(free)} free of ${formatBytes(total)}`;
+        }
+      } catch {
+        storageEl.textContent = '';
       }
     }
 
@@ -332,6 +350,7 @@
     drop.addEventListener('drop', (e) => uploadFiles(e.dataTransfer.files));
 
     refreshBtn.addEventListener('click', loadFiles);
+    setInterval(() => { if (authed) loadStorage(); }, 15000);
 
     // Attempt to load files to detect session state on first paint
     loadFiles().then(() => setLoggedIn(true)).catch(() => setLoggedIn(false));
