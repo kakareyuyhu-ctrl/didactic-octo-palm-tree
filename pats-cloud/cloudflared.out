@@ -40,8 +40,11 @@
 2025-08-10T23:48:36Z ERR Failed to serve tunnel connection error="context canceled" connIndex=0 event=0 ip=198.41.200.53
 2025-08-10T23:48:36Z INF Retrying connection in up to 32s connIndex=0 event=0 ip=198.41.200.53
 2025-08-10T23:48:54Z ERR Connection terminated error="context canceled" connIndex=0
-able to reach the origin service. The service may be down or it may not be responding to traffic from cloudflared: dial tcp 127.0.0.1:3000: connect: connection refused" connIndex=0 event=1 ingressRule=0 originService=http://127.0.0.1:3000
-2025-08-10T22:53:27Z ERR Request failed error="Unable to reach the origin service. The service may be down or it may not be responding to traffic from cloudflared: dial tcp 127.0.0.1:3000: connect: connection refused" connIndex=0 dest=https://coated-stunning-slim-forget.trycloudflare.com/api/folders event=0 ip=198.41.192.37 type=http
+2025-08-10T23:54:00Z INF Tunnel connection curve preferences: [X25519MLKEM768 CurveP256] connIndex=0 event=0 ip=198.41.200.53
+2025-08-10T23:54:00Z ERR Failed to serve tunnel connection error="context canceled" connIndex=0 event=0 ip=198.41.200.53
+2025-08-10T23:54:00Z INF Retrying connection in up to 1m4s connIndex=0 event=0 ip=198.41.200.53
+2025-08-10T23:54:10Z ERR Connection terminated error="context canceled" connIndex=0
+ connect: connection refused" connIndex=0 dest=https://coated-stunning-slim-forget.trycloudflare.com/api/folders event=0 ip=198.41.192.37 type=http
 2025-08-10T22:53:27Z ERR  error="Unable to reach the origin service. The service may be down or it may not be responding to traffic from cloudflared: dial tcp 127.0.0.1:3000: connect: connection refused" connIndex=0 event=1 ingressRule=0 originService=http://127.0.0.1:3000
 2025-08-10T22:53:27Z ERR Request failed error="Unable to reach the origin service. The service may be down or it may not be responding to traffic from cloudflared: dial tcp 127.0.0.1:3000: connect: connection refused" connIndex=0 dest=https://coated-stunning-slim-forget.trycloudflare.com/api/storage event=0 ip=198.41.192.37 type=http
 2025-08-10T22:53:27Z ERR  error="Unable to reach the origin service. The service may be down or it may not be responding to traffic from cloudflared: dial tcp 127.0.0.1:3000: connect: connection refused" connIndex=0 event=1 ingressRule=0 originService=http://127.0.0.1:3000
@@ -98,3 +101,11 @@ able to reach the origin service. The service may be down or it may not be respo
 2025-08-10T23:52:35Z ERR Failed to serve tunnel connection error="context canceled" connIndex=0 event=0 ip=198.41.200.53
 2025-08-10T23:52:35Z INF Retrying connection in up to 1m4s connIndex=0 event=0 ip=198.41.200.53
 2025-08-10T23:52:44Z ERR Connection terminated error="context canceled" connIndex=0
+2025-08-10T23:54:13Z INF Tunnel connection curve preferences: [X25519MLKEM768 CurveP256] connIndex=0 event=0 ip=198.41.200.53
+2025-08-10T23:54:13Z ERR Failed to serve tunnel connection error="context canceled" connIndex=0 event=0 ip=198.41.200.53
+2025-08-10T23:54:13Z INF Retrying connection in up to 1m4s connIndex=0 event=0 ip=198.41.200.53
+2025-08-10T23:54:19Z ERR Connection terminated error="context canceled" connIndex=0
+2025-08-10T23:54:33Z INF Tunnel connection curve preferences: [X25519MLKEM768 CurveP256] connIndex=0 event=0 ip=198.41.200.53
+2025-08-10T23:54:33Z ERR Failed to serve tunnel connection error="context canceled" connIndex=0 event=0 ip=198.41.200.53
+2025-08-10T23:54:33Z INF Retrying connection in up to 1m4s connIndex=0 event=0 ip=198.41.200.53
+2025-08-10T23:54:40Z ERR Connection terminated error="context canceled" connIndex=0
