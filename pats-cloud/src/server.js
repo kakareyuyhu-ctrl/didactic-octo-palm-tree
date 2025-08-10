@@ -20,6 +20,9 @@ const __dirname = path.dirname(__filename);
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+// Behind proxies/tunnels (e.g., Cloudflare), trust proxy for correct client IP
+app.set('trust proxy', 1);
+
 const UPLOAD_DIR = path.resolve(__dirname, '..', 'uploads');
 const CHUNK_DIR = path.resolve(UPLOAD_DIR, '.chunks');
 if (!fs.existsSync(UPLOAD_DIR)) {
@@ -144,9 +147,14 @@ const storage = multer.diskStorage({
       cb(e);
     }
   },
-  filename: (_req, file, cb) => {
-    const unique = getCollisionSafeName(UPLOAD_DIR, file.originalname);
-    cb(null, unique);
+  filename: (req, file, cb) => {
+    try {
+      const targetDir = resolveFolderDir(req.query.folder);
+      const unique = getCollisionSafeName(targetDir, file.originalname);
+      cb(null, unique);
+    } catch (e) {
+      cb(e);
+    }
   },
 });
 
