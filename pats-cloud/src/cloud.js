@@ -142,7 +142,9 @@ export async function uploadFileToCloud(filePath, key, contentType) {
         target = folder;
       }
     }
-    await new Promise((resolve, reject) => target.upload(filePath, (err, _file) => (err ? reject(err) : resolve())));
+    const fileName = path.basename(filePath);
+    const stream = fs.createReadStream(filePath);
+    await new Promise((resolve, reject) => target.upload(fileName, stream, (err, _file) => (err ? reject(err) : resolve())));
     return;
   }
   throw new Error('No cloud provider');
