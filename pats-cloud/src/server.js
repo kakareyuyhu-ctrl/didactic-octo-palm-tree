@@ -17,8 +17,12 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 const UPLOAD_DIR = path.resolve(__dirname, '..', 'uploads');
+const CHUNK_DIR = path.resolve(UPLOAD_DIR, '.chunks');
 if (!fs.existsSync(UPLOAD_DIR)) {
   fs.mkdirSync(UPLOAD_DIR, { recursive: true });
+}
+if (!fs.existsSync(CHUNK_DIR)) {
+  fs.mkdirSync(CHUNK_DIR, { recursive: true });
 }
 
 // Security headers
@@ -166,6 +170,100 @@ app.delete('/api/files/:name', requireAuth, async (req, res) => {
     res.json({ ok: true });
   } catch (err) {
     res.status(404).json({ error: 'Not found' });
+  }
+});
+
+// Chunked upload API
+function generateUploadId() {
+  return Math.random().toString(36).slice(2) + Date.now().toString(36);
+}
+
+app.post('/api/upload/init', requireAuth, async (req, res) => {
+  try {
+    const { filename, size, chunkSize, totalChunks } = req.body || {};
+    if (!filename || !size || !chunkSize || !totalChunks) {
+      return res.status(400).json({ error: 'Missing fields' });
+    }
+    const id = generateUploadId();
+    const dir = path.join(CHUNK_DIR, id);
+    await fs.promises.mkdir(dir, { recursive: true });
+    const meta = { filename: sanitizeFilename(path.parse(filename).name) + path.parse(filename).ext.toLowerCase(), size: Number(size), chunkSize: Number(chunkSize), totalChunks: Number(totalChunks), createdAt: Date.now() };
+    await fs.promises.writeFile(path.join(dir, 'meta.json'), JSON.stringify(meta));
+    res.json({ uploadId: id });
+  } catch (e) {
+    res.status(500).json({ error: 'Failed to init upload' });
+  }
+});
+
+app.put('/api/upload/chunk', requireAuth, express.raw({ type: '*/*', limit: '2gb' }), async (req, res) => {
+  try {
+    const { uploadId, index } = req.query;
+    if (!uploadId || typeof uploadId !== 'string') return res.status(400).json({ error: 'uploadId required' });
+    const chunkIndex = Number(index);
+    if (!Number.isInteger(chunkIndex) || chunkIndex < 0) return res.status(400).json({ error: 'invalid index' });
+    const dir = path.join(CHUNK_DIR, uploadId);
+    const metaPath = path.join(dir, 'meta.json');
+    if (!fs.existsSync(metaPath)) return res.status(404).json({ error: 'upload not found' });
+    const chunkPath = path.join(dir, `${chunkIndex}.part`);
+    await fs.promises.writeFile(chunkPath, req.body);
+    res.json({ ok: true });
+  } catch (e) {
+    res.status(500).json({ error: 'Failed to save chunk' });
+  }
+});
+
+app.post('/api/upload/complete', requireAuth, async (req, res) => {
+  try {
+    const { uploadId } = req.body || {};
+    if (!uploadId) return res.status(400).json({ error: 'uploadId required' });
+    const dir = path.join(CHUNK_DIR, uploadId);
+    const metaPath = path.join(dir, 'meta.json');
+    if (!fs.existsSync(metaPath)) return res.status(404).json({ error: 'upload not found' });
+    const meta = JSON.parse(await fs.promises.readFile(metaPath, 'utf8'));
+    const safeOutName = `${Date.now()}_${meta.filename}`;
+    const outPath = path.join(UPLOAD_DIR, safeOutName);
+
+    const writeStream = fs.createWriteStream(outPath, { flags: 'w' });
+    for (let i = 0; i < meta.totalChunks; i++) {
+      const chunkPath = path.join(dir, `${i}.part`);
+      if (!fs.existsSync(chunkPath)) {
+        writeStream.close();
+        await fs.promises.unlink(outPath).catch(() => {});
+        return res.status(400).json({ error: `missing chunk ${i}` });
+      }
+      await new Promise((resolve, reject) => {
+        const readStream = fs.createReadStream(chunkPath);
+        readStream.on('error', reject);
+        writeStream.on('error', reject);
+        readStream.on('end', resolve);
+        readStream.pipe(writeStream, { end: false });
+      });
+    }
+    writeStream.end();
+    await new Promise((r) => writeStream.on('close', r));
+
+    // cleanup
+    const files = await fs.promises.readdir(dir);
+    await Promise.all(files.map((f) => fs.promises.unlink(path.join(dir, f))));
+    await fs.promises.rmdir(dir);
+
+    const stat = await fs.promises.stat(outPath);
+    res.json({ ok: true, file: { name: path.basename(outPath), size: stat.size } });
+  } catch (e) {
+    res.status(500).json({ error: 'Failed to complete upload' });
+  }
+});
+
+app.delete('/api/upload/abort/:uploadId', requireAuth, async (req, res) => {
+  try {
+    const dir = path.join(CHUNK_DIR, req.params.uploadId);
+    if (!fs.existsSync(dir)) return res.json({ ok: true });
+    const files = await fs.promises.readdir(dir);
+    await Promise.all(files.map((f) => fs.promises.unlink(path.join(dir, f))));
+    await fs.promises.rmdir(dir);
+    res.json({ ok: true });
+  } catch {
+    res.json({ ok: true });
   }
 });
 

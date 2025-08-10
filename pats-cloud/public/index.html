@@ -74,6 +74,11 @@
     .file .meta { display: flex; gap: 10px; align-items: center; min-width: 0; }
     .file .name { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
+    .upload-item { padding: 10px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1); background: var(--surface-2); }
+    .progress { height: 8px; background: rgba(255,255,255,0.12); border-radius: 999px; overflow: hidden; }
+    .progress > div { height: 100%; width: 0%; background: linear-gradient(90deg, var(--primary), var(--primary-2)); transition: width 0.15s ease; }
+    .small { font-size: 12px; color: var(--muted); }
+
     .spacer { flex: 1; }
     .hidden { display: none !important; }
 
@@ -113,6 +118,11 @@
       <div id="drop" class="file-drop" style="margin-top:10px">Drop files here to upload</div>
 
       <ul id="fileList" class="files" style="margin-top:12px"></ul>
+
+      <div id="uploadsContainer" style="margin-top:12px">
+        <div class="small">In progress</div>
+        <ul id="uploads" class="files"></ul>
+      </div>
     </section>
   </div>
 
@@ -127,6 +137,7 @@
     const fileList = document.getElementById('fileList');
     const drop = document.getElementById('drop');
     const refreshBtn = document.getElementById('refreshBtn');
+    const uploadsList = document.getElementById('uploads');
 
     let authed = false;
 
@@ -211,17 +222,101 @@
       }
     }
 
-    function uploadFiles(files) {
+    function formatBytes(b) {
+      const units = ['B','KB','MB','GB','TB'];
+      let i = 0; let v = b;
+      while (v >= 1024 && i < units.length - 1) { v /= 1024; i++; }
+      return `${v.toFixed(v >= 100 ? 0 : v >= 10 ? 1 : 2)} ${units[i]}`;
+    }
+
+    async function uploadFiles(files) {
       if (!files?.length) return;
-      const form = new FormData();
-      for (const f of files) form.append('files', f);
-      fetch('/api/upload', { method: 'POST', body: form, credentials: 'same-origin' })
-        .then(async (r) => {
-          if (!r.ok) throw new Error('Upload failed');
-          return r.json();
-        })
-        .then(() => loadFiles())
-        .catch(() => alert('Upload failed'));
+      for (const file of files) {
+        void uploadFileChunked(file);
+      }
+    }
+
+    async function uploadFileChunked(file) {
+      const chunkSize = 5 * 1024 * 1024; // 5MB
+      const totalChunks = Math.ceil(file.size / chunkSize);
+      const li = document.createElement('li');
+      li.className = 'upload-item';
+      li.innerHTML = `
+        <div style="display:flex; justify-content:space-between; gap:10px; align-items:center">
+          <div class="name" style="flex:1; min-width:0">${file.name}</div>
+          <div class="small">${formatBytes(file.size)}</div>
+        </div>
+        <div class="progress" style="margin-top:8px"><div></div></div>
+        <div class="small" style="margin-top:6px"><span class="pct">0%</span> • <span class="speed">0 MB/s</span> • <span class="eta">—</span></div>
+      `;
+      uploadsList.appendChild(li);
+      const bar = li.querySelector('.progress > div');
+      const pctEl = li.querySelector('.pct');
+      const speedEl = li.querySelector('.speed');
+      const etaEl = li.querySelector('.eta');
+
+      const t0 = performance.now();
+      let uploaded = 0;
+      let lastTime = t0;
+      let lastUploaded = 0;
+
+      try {
+        const initRes = await fetch('/api/upload/init', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'same-origin',
+          body: JSON.stringify({ filename: file.name, size: file.size, chunkSize, totalChunks }),
+        });
+        if (!initRes.ok) throw new Error('init failed');
+        const { uploadId } = await initRes.json();
+
+        for (let i = 0; i < totalChunks; i++) {
+          const start = i * chunkSize;
+          const end = Math.min(file.size, start + chunkSize);
+          const chunk = file.slice(start, end);
+
+          const res = await fetch(`/api/upload/chunk?uploadId=${encodeURIComponent(uploadId)}&index=${i}` , {
+            method: 'PUT',
+            body: chunk,
+            credentials: 'same-origin',
+          });
+          if (!res.ok) throw new Error('chunk failed');
+
+          uploaded += chunk.size;
+          const now = performance.now();
+          const dt = (now - lastTime) / 1000;
+          if (dt >= 0.3) {
+            const ds = uploaded - lastUploaded;
+            const speed = ds / dt; // bytes/s
+            speedEl.textContent = `${(speed / (1024*1024)).toFixed(2)} MB/s`;
+            const remaining = file.size - uploaded;
+            const eta = speed > 0 ? remaining / speed : 0;
+            etaEl.textContent = eta ? `${Math.ceil(eta)}s left` : '—';
+            lastTime = now;
+            lastUploaded = uploaded;
+          }
+          const p = Math.round((uploaded / file.size) * 100);
+          bar.style.width = `${p}%`;
+          pctEl.textContent = `${p}%`;
+        }
+
+        const fin = await fetch('/api/upload/complete', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'same-origin',
+          body: JSON.stringify({ uploadId }),
+        });
+        if (!fin.ok) throw new Error('complete failed');
+        bar.style.width = '100%';
+        pctEl.textContent = '100%';
+        etaEl.textContent = 'Done';
+      } catch (e) {
+        li.querySelector('.name').textContent += ' — failed';
+        bar.style.background = 'linear-gradient(90deg, #f87171, #ef4444)';
+      } finally {
+        await loadFiles();
+        setTimeout(() => li.remove(), 1500);
+      }
     }
 
     fileInput.addEventListener('change', (e) => uploadFiles(e.target.files));
