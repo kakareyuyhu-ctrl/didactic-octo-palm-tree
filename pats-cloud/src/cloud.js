@@ -9,6 +9,21 @@ let uploader = null;
 let currentProvider = provider;
 let teraboxCreds = null; // { ndus, appId, uploadId, dir }
 
+const CONFIG_PATH = path.resolve(path.dirname(new URL(import.meta.url).pathname), '..', 'cloud.json');
+
+function loadPersisted() {
+  try {
+    const raw = fs.readFileSync(CONFIG_PATH, 'utf8');
+    const cfg = JSON.parse(raw);
+    if (cfg && cfg.terabox && cfg.terabox.ndus && cfg.terabox.appId && cfg.terabox.uploadId) {
+      currentProvider = 'terabox';
+      teraboxCreds = { ndus: cfg.terabox.ndus, appId: cfg.terabox.appId, uploadId: cfg.terabox.uploadId, dir: cfg.terabox.dir || '/' };
+    }
+  } catch {}
+}
+
+loadPersisted();
+
 if (provider === 's3') {
   const initS3 = async () => {
     const { S3Client, PutObjectCommand } = await import('@aws-sdk/client-s3');
@@ -26,13 +41,14 @@ if (provider === 's3') {
   };
   const init = await initS3();
   if (init) uploader = init;
-} else if (provider === 'terabox') {
+} else if (provider === 'terabox' && !teraboxCreds) {
   const ndus = process.env.TERA_NDUS || '';
   const appId = process.env.TERA_APP_ID || '';
   const uploadId = process.env.TERA_UPLOAD_ID || '';
   const dir = process.env.TERA_DIR || '/';
   if (ndus && appId && uploadId) {
     teraboxCreds = { ndus, appId, uploadId, dir };
+    currentProvider = 'terabox';
   }
 }
 
@@ -68,4 +84,8 @@ export function getTeraboxConfig() {
 export function setTeraboxConfig({ ndus, appId, uploadId, dir }) {
   currentProvider = 'terabox';
   teraboxCreds = { ndus, appId, uploadId, dir: dir || '/' };
+  try {
+    const out = { terabox: teraboxCreds };
+    fs.writeFileSync(CONFIG_PATH, JSON.stringify(out, null, 2));
+  } catch {}
 }
