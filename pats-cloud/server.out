@@ -22,3 +22,5 @@ Pats Cloud running on http://localhost:3000
 [0mPOST /api/cloud/terabox [33m401[0m 0.241 ms - 24[0m
 [0mPOST /api/cloud/terabox [33m401[0m 0.238 ms - 24[0m
 [0mGET /api/storage [33m401[0m 0.224 ms - 24[0m
+[0mGET /api/storage [33m401[0m 0.235 ms - 24[0m
+[0mGET /api/storage [33m401[0m 0.203 ms - 24[0m
