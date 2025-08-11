@@ -275,7 +275,127 @@ Fetching data for Db4...
  ✓ Compiled in 149ms (714 modules)
  ✓ Compiled /api/storage in 70ms (714 modules)
  GET /api/storage 200 in 599ms
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              Attention: Next.js now collects completely anonymous telemetry regarding usage.
+ GET / 200 in 42ms
+ ✓ Compiled /api/files in 67ms (716 modules)
+Fetching data for Db1...
+Fetching data for Db2...
+Fetching data for Db3...
+Fetching data for Db4...
+Fetching data for Db5...
+ GET /api/storage 200 in 620ms
+ GET /api/files?search=&pid=0 200 in 1077ms
+Fetching data for Db1...
+Fetching data for Db2...
+Fetching data for Db3...
+Fetching data for Db4...
+Fetching data for Db5...
+ GET /api/storage 200 in 416ms
+ GET /api/files?search=&pid=0 200 in 829ms
+Fetching data for Db1...
+Fetching data for Db2...
+Fetching data for Db3...
+Fetching data for Db4...
+Fetching data for Db5...
+Error fetching Db1: TypeError: Cannot read properties of null (reading 'map')
+    at fetchDriveData (webpack-internal:///(rsc)/./src/app/api/files/route.ts:79:34)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async Promise.all (index 0)
+    at async GET (webpack-internal:///(rsc)/./src/app/api/files/route.ts:117:30)
+    at async /workspace/jemph-cloud-storage/node_modules/next/dist/compiled/next-server/app-route.runtime.dev.js:6:55831
+    at async eO.execute (/workspace/jemph-cloud-storage/node_modules/next/dist/compiled/next-server/app-route.runtime.dev.js:6:46527)
+    at async eO.handle (/workspace/jemph-cloud-storage/node_modules/next/dist/compiled/next-server/app-route.runtime.dev.js:6:57165)
+    at async doRender (/workspace/jemph-cloud-storage/node_modules/next/dist/server/base-server.js:1353:42)
+    at async cacheEntry.responseCache.get.routeKind (/workspace/jemph-cloud-storage/node_modules/next/dist/server/base-server.js:1575:28)
+    at async DevServer.renderToResponseWithComponentsImpl (/workspace/jemph-cloud-storage/node_modules/next/dist/server/base-server.js:1483:28)
+    at async DevServer.renderPageComponent (/workspace/jemph-cloud-storage/node_modules/next/dist/server/base-server.js:1911:24)
+    at async DevServer.renderToResponseImpl (/workspace/jemph-cloud-storage/node_modules/next/dist/server/base-server.js:1949:32)
+    at async DevServer.pipeImpl (/workspace/jemph-cloud-storage/node_modules/next/dist/server/base-server.js:921:25)
+    at async NextNodeServer.handleCatchallRenderRequest (/workspace/jemph-cloud-storage/node_modules/next/dist/server/next-server.js:272:17)
+    at async DevServer.handleRequestImpl (/workspace/jemph-cloud-storage/node_modules/next/dist/server/base-server.js:817:17)
+    at async /workspace/jemph-cloud-storage/node_modules/next/dist/server/dev/next-dev-server.js:339:20
+    at async Span.traceAsyncFn (/workspace/jemph-cloud-storage/node_modules/next/dist/trace/trace.js:154:20)
+    at async DevServer.handleRequest (/workspace/jemph-cloud-storage/node_modules/next/dist/server/dev/next-dev-server.js:336:24)
+    at async invokeRender (/workspace/jemph-cloud-storage/node_modules/next/dist/server/lib/router-server.js:173:21)
+    at async handleRequest (/workspace/jemph-cloud-storage/node_modules/next/dist/server/lib/router-server.js:350:24)
+    at async requestHandlerImpl (/workspace/jemph-cloud-storage/node_modules/next/dist/server/lib/router-server.js:374:13)
+    at async Server.requestListener (/workspace/jemph-cloud-storage/node_modules/next/dist/server/lib/start-server.js:141:13)
+Error fetching Db5: TypeError: Cannot read properties of null (reading 'map')
+    at fetchDriveData (webpack-internal:///(rsc)/./src/app/api/files/route.ts:79:34)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async Promise.all (index 4)
+    at async GET (webpack-internal:///(rsc)/./src/app/api/files/route.ts:117:30)
+    at async /workspace/jemph-cloud-storage/node_modules/next/dist/compiled/next-server/app-route.runtime.dev.js:6:55831
+    at async eO.execute (/workspace/jemph-cloud-storage/node_modules/next/dist/compiled/next-server/app-route.runtime.dev.js:6:46527)
+    at async eO.handle (/workspace/jemph-cloud-storage/node_modules/next/dist/compiled/next-server/app-route.runtime.dev.js:6:57165)
+    at async doRender (/workspace/jemph-cloud-storage/node_modules/next/dist/server/base-server.js:1353:42)
+    at async cacheEntry.responseCache.get.routeKind (/workspace/jemph-cloud-storage/node_modules/next/dist/server/base-server.js:1575:28)
+    at async DevServer.renderToResponseWithComponentsImpl (/workspace/jemph-cloud-storage/node_modules/next/dist/server/base-server.js:1483:28)
+    at async DevServer.renderPageComponent (/workspace/jemph-cloud-storage/node_modules/next/dist/server/base-server.js:1911:24)
+    at async DevServer.renderToResponseImpl (/workspace/jemph-cloud-storage/node_modules/next/dist/server/base-server.js:1949:32)
+    at async DevServer.pipeImpl (/workspace/jemph-cloud-storage/node_modules/next/dist/server/base-server.js:921:25)
+    at async NextNodeServer.handleCatchallRenderRequest (/workspace/jemph-cloud-storage/node_modules/next/dist/server/next-server.js:272:17)
+    at async DevServer.handleRequestImpl (/workspace/jemph-cloud-storage/node_modules/next/dist/server/base-server.js:817:17)
+    at async /workspace/jemph-cloud-storage/node_modules/next/dist/server/dev/next-dev-server.js:339:20
+    at async Span.traceAsyncFn (/workspace/jemph-cloud-storage/node_modules/next/dist/trace/trace.js:154:20)
+    at async DevServer.handleRequest (/workspace/jemph-cloud-storage/node_modules/next/dist/server/dev/next-dev-server.js:336:24)
+    at async invokeRender (/workspace/jemph-cloud-storage/node_modules/next/dist/server/lib/router-server.js:173:21)
+    at async handleRequest (/workspace/jemph-cloud-storage/node_modules/next/dist/server/lib/router-server.js:350:24)
+    at async requestHandlerImpl (/workspace/jemph-cloud-storage/node_modules/next/dist/server/lib/router-server.js:374:13)
+    at async Server.requestListener (/workspace/jemph-cloud-storage/node_modules/next/dist/server/lib/start-server.js:141:13)
+Error fetching Db3: TypeError: Cannot read properties of null (reading 'map')
+    at fetchDriveData (webpack-internal:///(rsc)/./src/app/api/files/route.ts:79:34)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async Promise.all (index 2)
+    at async GET (webpack-internal:///(rsc)/./src/app/api/files/route.ts:117:30)
+    at async /workspace/jemph-cloud-storage/node_modules/next/dist/compiled/next-server/app-route.runtime.dev.js:6:55831
+    at async eO.execute (/workspace/jemph-cloud-storage/node_modules/next/dist/compiled/next-server/app-route.runtime.dev.js:6:46527)
+    at async eO.handle (/workspace/jemph-cloud-storage/node_modules/next/dist/compiled/next-server/app-route.runtime.dev.js:6:57165)
+    at async doRender (/workspace/jemph-cloud-storage/node_modules/next/dist/server/base-server.js:1353:42)
+    at async cacheEntry.responseCache.get.routeKind (/workspace/jemph-cloud-storage/node_modules/next/dist/server/base-server.js:1575:28)
+    at async DevServer.renderToResponseWithComponentsImpl (/workspace/jemph-cloud-storage/node_modules/next/dist/server/base-server.js:1483:28)
+    at async DevServer.renderPageComponent (/workspace/jemph-cloud-storage/node_modules/next/dist/server/base-server.js:1911:24)
+    at async DevServer.renderToResponseImpl (/workspace/jemph-cloud-storage/node_modules/next/dist/server/base-server.js:1949:32)
+    at async DevServer.pipeImpl (/workspace/jemph-cloud-storage/node_modules/next/dist/server/base-server.js:921:25)
+    at async NextNodeServer.handleCatchallRenderRequest (/workspace/jemph-cloud-storage/node_modules/next/dist/server/next-server.js:272:17)
+    at async DevServer.handleRequestImpl (/workspace/jemph-cloud-storage/node_modules/next/dist/server/base-server.js:817:17)
+    at async /workspace/jemph-cloud-storage/node_modules/next/dist/server/dev/next-dev-server.js:339:20
+    at async Span.traceAsyncFn (/workspace/jemph-cloud-storage/node_modules/next/dist/trace/trace.js:154:20)
+    at async DevServer.handleRequest (/workspace/jemph-cloud-storage/node_modules/next/dist/server/dev/next-dev-server.js:336:24)
+    at async invokeRender (/workspace/jemph-cloud-storage/node_modules/next/dist/server/lib/router-server.js:173:21)
+    at async handleRequest (/workspace/jemph-cloud-storage/node_modules/next/dist/server/lib/router-server.js:350:24)
+    at async requestHandlerImpl (/workspace/jemph-cloud-storage/node_modules/next/dist/server/lib/router-server.js:374:13)
+    at async Server.requestListener (/workspace/jemph-cloud-storage/node_modules/next/dist/server/lib/start-server.js:141:13)
+Error fetching Db4: TypeError: Cannot read properties of null (reading 'map')
+    at fetchDriveData (webpack-internal:///(rsc)/./src/app/api/files/route.ts:79:34)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async Promise.all (index 3)
+    at async GET (webpack-internal:///(rsc)/./src/app/api/files/route.ts:117:30)
+    at async /workspace/jemph-cloud-storage/node_modules/next/dist/compiled/next-server/app-route.runtime.dev.js:6:55831
+    at async eO.execute (/workspace/jemph-cloud-storage/node_modules/next/dist/compiled/next-server/app-route.runtime.dev.js:6:46527)
+    at async eO.handle (/workspace/jemph-cloud-storage/node_modules/next/dist/compiled/next-server/app-route.runtime.dev.js:6:57165)
+    at async doRender (/workspace/jemph-cloud-storage/node_modules/next/dist/server/base-server.js:1353:42)
+    at async cacheEntry.responseCache.get.routeKind (/workspace/jemph-cloud-storage/node_modules/next/dist/server/base-server.js:1575:28)
+    at async DevServer.renderToResponseWithComponentsImpl (/workspace/jemph-cloud-storage/node_modules/next/dist/server/base-server.js:1483:28)
+    at async DevServer.renderPageComponent (/workspace/jemph-cloud-storage/node_modules/next/dist/server/base-server.js:1911:24)
+    at async DevServer.renderToResponseImpl (/workspace/jemph-cloud-storage/node_modules/next/dist/server/base-server.js:1949:32)
+    at async DevServer.pipeImpl (/workspace/jemph-cloud-storage/node_modules/next/dist/server/base-server.js:921:25)
+    at async NextNodeServer.handleCatchallRenderRequest (/workspace/jemph-cloud-storage/node_modules/next/dist/server/next-server.js:272:17)
+    at async DevServer.handleRequestImpl (/workspace/jemph-cloud-storage/node_modules/next/dist/server/base-server.js:817:17)
+    at async /workspace/jemph-cloud-storage/node_modules/next/dist/server/dev/next-dev-server.js:339:20
+    at async Span.traceAsyncFn (/workspace/jemph-cloud-storage/node_modules/next/dist/trace/trace.js:154:20)
+    at async DevServer.handleRequest (/workspace/jemph-cloud-storage/node_modules/next/dist/server/dev/next-dev-server.js:336:24)
+    at async invokeRender (/workspace/jemph-cloud-storage/node_modules/next/dist/server/lib/router-server.js:173:21)
+    at async handleRequest (/workspace/jemph-cloud-storage/node_modules/next/dist/server/lib/router-server.js:350:24)
+    at async requestHandlerImpl (/workspace/jemph-cloud-storage/node_modules/next/dist/server/lib/router-server.js:374:13)
+    at async Server.requestListener (/workspace/jemph-cloud-storage/node_modules/next/dist/server/lib/start-server.js:141:13)
+ GET /api/files?search=&pid=58181683 200 in 1016ms
+Fetching data for Db1...
+Fetching data for Db2...
+Fetching data for Db3...
+Fetching data for Db4...
+Fetching data for Db5...
+ GET /api/files?search=&pid=0 200 in 1102ms
+            Attention: Next.js now collects completely anonymous telemetry regarding usage.
 This information is used to shape Next.js' roadmap and prioritize features.
 You can learn more, including how to opt-out if you'd not like to participate in this anonymous program, by visiting the following URL:
 https://nextjs.org/telemetry
