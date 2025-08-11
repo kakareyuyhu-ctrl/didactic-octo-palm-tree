@@ -35,3 +35,67 @@ Fetching data for LinkToBox...
 Fetching data for LinkToBox...
  GET /api/storage 200 in 476ms
  GET /api/files?search=&pid=0 200 in 780ms
+ GET / 200 in 124ms
+Fetching data for LinkToBox...
+ GET /api/storage 200 in 485ms
+ GET /api/files?search=&pid=0 200 in 1016ms
+ GET /api/storage 200 in 378ms
+Fetching data for LinkToBox...
+ GET /api/files?search=&pid=0 200 in 754ms
+ GET / 200 in 21ms
+Fetching data for LinkToBox...
+ GET /api/storage 200 in 401ms
+ GET /api/files?search=&pid=0 200 in 922ms
+ GET /api/storage 200 in 445ms
+Fetching data for LinkToBox...
+ GET /api/files?search=&pid=0 200 in 824ms
+ ✓ Compiled in 555ms (1395 modules)
+ ✓ Compiled in 277ms (1409 modules)
+ ✓ Compiled in 534ms (1409 modules)
+ ✓ Compiled in 246ms (1409 modules)
+ ✓ Compiled in 279ms (1409 modules)
+ ✓ Compiled in 257ms (1371 modules)
+ ✓ Compiled in 227ms (1371 modules)
+ ✓ Compiled in 223ms (1371 modules)
+ ✓ Compiled in 287ms (1371 modules)
+ ✓ Compiled in 281ms (1371 modules)
+ ✓ Compiled in 216ms (1371 modules)
+ ✓ Compiled in 215ms (1371 modules)
+ ✓ Compiled in 246ms (1371 modules)
+ ✓ Compiled in 216ms (1371 modules)
+ ✓ Compiled in 210ms (1371 modules)
+ ✓ Compiled in 280ms (1371 modules)
+ ✓ Compiled in 236ms (1371 modules)
+ GET / 200 in 150ms
+ ✓ Compiled /api/storage in 148ms (714 modules)
+ ✓ Compiled (716 modules)
+Fetching data for LinkToBox...
+ GET /api/storage 200 in 752ms
+ GET /api/files?search=&pid=0 200 in 1287ms
+ ✓ Compiled in 207ms (1409 modules)
+Fetching data for LinkToBox...
+ GET /api/storage 200 in 450ms
+ GET /api/files?search=&pid=0 200 in 689ms
+ ✓ Compiled in 269ms (1409 modules)
+ ✓ Compiled in 284ms (1409 modules)
+ ✓ Compiled in 240ms (1409 modules)
+ ✓ Compiled in 221ms (1409 modules)
+ ✓ Compiled in 294ms (1409 modules)
+ GET / 200 in 137ms
+Fetching data for LinkToBox...
+ GET /api/storage 200 in 531ms
+ GET /api/files?search=&pid=0 200 in 1115ms
+Fetching data for LinkToBox...
+ GET /api/storage 200 in 441ms
+ GET /api/files?search=&pid=0 200 in 712ms
+ GET / 200 in 19ms
+Fetching data for LinkToBox...
+ GET /api/storage 200 in 462ms
+ GET /api/files?search=&pid=0 200 in 918ms
+ GET /api/storage 200 in 335ms
+Fetching data for LinkToBox...
+ GET /api/files?search=&pid=0 200 in 711ms
+ ✓ Compiled in 139ms (693 modules)
+ ✓ Compiled in 136ms (693 modules)
+ ✓ Compiled in 140ms (693 modules)
+ ✓ Compiled in 386ms (1409 modules)
