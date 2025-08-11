@@ -328,3 +328,42 @@ Delete attempt failed {
   body: '{"msg":"Server Error"}'
 }
  POST /api/file/delete 400 in 1850ms
+ ✓ Compiled in 902ms (1371 modules)
+ ✓ Compiled in 266ms (1371 modules)
+ ✓ Compiled in 254ms (1371 modules)
+ GET / 200 in 104ms
+ ✓ Compiled /api/storage in 70ms (714 modules)
+ ✓ Compiled (716 modules)
+Fetching data for LinkToBox...
+ GET /api/storage 200 in 666ms
+ GET /api/files?search=&pid=0 200 in 1169ms
+ GET /api/storage 200 in 337ms
+Fetching data for LinkToBox...
+ GET /api/files?search=&pid=0 200 in 693ms
+ GET / 200 in 110ms
+Fetching data for LinkToBox...
+ GET /api/storage 200 in 457ms
+ GET /api/storage 200 in 344ms
+ GET /api/files?search=&pid=0 200 in 876ms
+Fetching data for LinkToBox...
+ ✓ Compiled in 342ms (1409 modules)
+ GET /api/files?search=&pid=0 200 in 694ms
+ ⚠ Fast Refresh had to perform a full reload due to a runtime error.
+ GET / 200 in 60ms
+Fetching data for LinkToBox...
+ GET /api/storage 200 in 337ms
+ GET /api/files?search=&pid=0 200 in 821ms
+Fetching data for LinkToBox...
+ GET /api/storage 200 in 335ms
+ GET /api/files?search=&pid=0 200 in 1291ms
+ ✓ Compiled in 271ms (1409 modules)
+ GET / 200 in 41ms
+ ⚠ Fast Refresh had to perform a full reload due to a runtime error.
+Fetching data for LinkToBox...
+ GET /api/storage 200 in 421ms
+ GET /api/storage 200 in 340ms
+ GET /api/files?search=&pid=0 200 in 1397ms
+Fetching data for LinkToBox...
+ GET /api/files?search=&pid=0 200 in 686ms
+ ✓ Compiled in 163ms (693 modules)
+ ✓ Compiled in 198ms (1409 modules)
