@@ -1,0 +1,12 @@
+nohup: ignoring input
+
+> jemph-cloud-storage@0.1.0 dev
+> next dev
+
+  ▲ Next.js 14.2.18
+  - Local:        http://localhost:3000
+
+ ✓ Starting...
+ ✓ Ready in 1071ms
+ ✓ Compiled /api/storage in 335ms (63 modules)
+ GET /api/storage 200 in 919ms
