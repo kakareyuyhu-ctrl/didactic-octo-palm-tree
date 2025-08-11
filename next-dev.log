@@ -115,3 +115,14 @@ Fetching data for LinkToBox...
  GET /api/files?search=&pid=0 200 in 800ms
  ✓ Compiled in 556ms (1371 modules)
  ✓ Compiled in 724ms (1373 modules)
+ GET / 200 in 167ms
+ ✓ Compiled /api/storage in 115ms (715 modules)
+ ✓ Compiled (717 modules)
+Fetching data for LinkToBox...
+ GET /api/storage 200 in 696ms
+ GET /api/files?search=&pid=0 200 in 1179ms
+Fetching data for LinkToBox...
+ GET /api/storage 200 in 506ms
+ GET /api/files?search=&pid=0 200 in 941ms
+ ✓ Compiled /api/file/delete in 135ms (719 modules)
+ POST /api/file/delete 400 in 982ms
