@@ -1,0 +1,23 @@
+{
+  "name": "@pat-cloud/shared",
+  "version": "1.0.0",
+  "description": "Shared types and utilities for Pat-Cloud Storage",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "clean": "rm -rf dist"
+  },
+  "devDependencies": {
+    "typescript": "^5.0.0"
+  },
+  "keywords": [
+    "cloud-storage",
+    "types",
+    "utilities",
+    "shared"
+  ],
+  "author": "Pat-Cloud Team",
+  "license": "MIT"
+}

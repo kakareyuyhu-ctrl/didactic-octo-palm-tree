@@ -1,0 +1,44 @@
+{
+  "name": "pat-cloud-storage",
+  "version": "1.0.0",
+  "description": "A modern, secure cloud storage solution",
+  "main": "index.js",
+  "scripts": {
+    "dev": "concurrently \"npm run build:shared\" \"npm run dev:backend\" \"npm run dev:frontend\"",
+    "dev:backend": "cd backend && npm run dev",
+    "dev:frontend": "cd frontend && npm run dev",
+    "build": "npm run build:shared && npm run build:backend && npm run build:frontend",
+    "build:shared": "cd shared && npm run build",
+    "build:backend": "cd backend && npm run build",
+    "build:frontend": "cd frontend && npm run build",
+    "start": "cd backend && npm start",
+    "test": "npm run test:backend && npm run test:frontend",
+    "test:backend": "cd backend && npm test",
+    "test:frontend": "cd frontend && npm test",
+    "lint": "npm run lint:backend && npm run lint:frontend",
+    "lint:backend": "cd backend && npm run lint",
+    "lint:frontend": "cd frontend && npm run lint",
+    "install:all": "npm install && cd shared && npm install && cd ../backend && npm install && cd ../frontend && npm install",
+    "clean": "npm run clean:shared && npm run clean:backend && npm run clean:frontend",
+    "clean:shared": "cd shared && npm run clean",
+    "clean:backend": "cd backend && npm run clean",
+    "clean:frontend": "cd frontend && npm run clean"
+  },
+  "keywords": [
+    "cloud-storage",
+    "file-management",
+    "react",
+    "nodejs",
+    "typescript"
+  ],
+  "author": "Pat",
+  "license": "MIT",
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  },
+  "workspaces": [
+    "backend",
+    "frontend",
+    "shared"
+  ]
+}
