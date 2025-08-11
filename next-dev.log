@@ -263,3 +263,5 @@ Fetching data for LinkToBox...
  GET /api/files?search=&pid=0 200 in 687ms
  ✓ Compiled /api/file/delete in 172ms (719 modules)
  POST /api/file/delete 400 in 982ms
+ ✓ Compiled in 373ms (1413 modules)
+ ✓ Compiled in 216ms (1373 modules)
