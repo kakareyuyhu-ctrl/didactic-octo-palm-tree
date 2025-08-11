@@ -395,8 +395,11 @@ Fetching data for Db3...
 Fetching data for Db4...
 Fetching data for Db5...
  GET /api/files?search=&pid=0 200 in 1102ms
-            Attention: Next.js now collects completely anonymous telemetry regarding usage.
-This information is used to shape Next.js' roadmap and prioritize features.
+ ✓ Compiled in 378ms (1407 modules)
+ ✓ Compiled /api/storage in 197ms (714 modules)
+ GET /api/storage 200 in 825ms
+ GET /api/storage 200 in 621ms
+oritize features.
 You can learn more, including how to opt-out if you'd not like to participate in this anonymous program, by visiting the following URL:
 https://nextjs.org/telemetry
 
