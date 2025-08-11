@@ -253,3 +253,13 @@ Error fetching LinkToBox: TypeError: Cannot read properties of null (reading 'ma
     at async requestHandlerImpl (/workspace/jemph-cloud-storage/node_modules/next/dist/server/lib/router-server.js:374:13)
     at async Server.requestListener (/workspace/jemph-cloud-storage/node_modules/next/dist/server/lib/start-server.js:141:13)
  GET /api/files?search=Cursor&pid=0 200 in 676ms
+ GET / 200 in 118ms
+ ✓ Compiled /api/storage in 58ms (717 modules)
+Fetching data for LinkToBox...
+ GET /api/storage 200 in 535ms
+ GET /api/files?search=&pid=0 200 in 999ms
+Fetching data for LinkToBox...
+ GET /api/storage 200 in 343ms
+ GET /api/files?search=&pid=0 200 in 687ms
+ ✓ Compiled /api/file/delete in 172ms (719 modules)
+ POST /api/file/delete 400 in 982ms
