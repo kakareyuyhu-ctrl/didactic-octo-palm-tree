@@ -297,3 +297,34 @@ Delete attempt failed {
 }
  POST /api/file/delete 400 in 1821ms
  ✓ Compiled in 672ms (1373 modules)
+ GET / 200 in 114ms
+ ✓ Compiled /api/files in 78ms (715 modules)
+ ✓ Compiled (717 modules)
+Fetching data for LinkToBox...
+ GET /api/storage 200 in 607ms
+ GET /api/files?search=&pid=0 200 in 1103ms
+ GET /api/storage 200 in 335ms
+Fetching data for LinkToBox...
+ GET /api/files?search=&pid=0 200 in 728ms
+ ✓ Compiled /api/file/delete in 74ms (719 modules)
+Delete attempt failed {
+  url: 'https://www.linkbox.to/api/file/del?pid=0&itemIds=fp5ipg000sph&dirIds=&isVip=true&verc=15004001&token=640288642_0b5f820e427447089451&platform=android&pf=android&lan=en',
+  status: 500,
+  body: '{"msg":"Server Error"}'
+}
+Delete attempt failed {
+  url: 'https://www.linkbox.to/api/file/del',
+  status: 500,
+  body: '{"msg":"Server Error"}'
+}
+Delete attempt failed {
+  url: 'https://www.linkbox.to/api/file/del/android?pid=0&itemIds=fp5ipg000sph&dirIds=&isVip=true&verc=15004001&token=640288642_0b5f820e427447089451&platform=android&pf=android&lan=en',
+  status: 500,
+  body: '{"msg":"Server Error"}'
+}
+Delete attempt failed {
+  url: 'https://www.linkbox.to/api/file/del/android',
+  status: 500,
+  body: '{"msg":"Server Error"}'
+}
+ POST /api/file/delete 400 in 1850ms
