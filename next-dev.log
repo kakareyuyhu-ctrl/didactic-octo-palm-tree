@@ -3046,3 +3046,7 @@ Error fetching Db4: TypeError: Cannot read properties of null (reading 'map')
     at async requestHandlerImpl (/workspace/jemph-cloud-storage/node_modules/next/dist/server/lib/router-server.js:374:13)
     at async Server.requestListener (/workspace/jemph-cloud-storage/node_modules/next/dist/server/lib/start-server.js:141:13)
  GET /api/files?search=&pid=62624386 200 in 902ms
+ ✓ Compiled in 465ms (1357 modules)
+ ○ Compiling /api/project.zip ...
+ ✓ Compiled /api/project.zip in 730ms (932 modules)
+ HEAD /api/project.zip 200 in 810ms
