@@ -10,3 +10,18 @@ nohup: ignoring input
  ✓ Ready in 1071ms
  ✓ Compiled /api/storage in 335ms (63 modules)
  GET /api/storage 200 in 919ms
+ ○ Compiling / ...
+Browserslist: browsers data (caniuse-lite) is 10 months old. Please run:
+  npx update-browserslist-db@latest
+  Why you should do it regularly: https://github.com/browserslist/update-db#readme
+ ✓ Compiled / in 4.4s (1371 modules)
+ GET / 200 in 4779ms
+ ✓ Compiled in 370ms (693 modules)
+ ✓ Compiled /api/storage in 250ms (714 modules)
+ ✓ Compiled (716 modules)
+Fetching data for LinkToBox...
+ GET /api/storage 200 in 867ms
+ GET /api/files?search=&pid=0 200 in 1378ms
+ GET /api/storage 200 in 340ms
+Fetching data for LinkToBox...
+ GET /api/files?search=&pid=0 200 in 923ms
