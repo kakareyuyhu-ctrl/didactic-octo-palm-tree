@@ -29,3 +29,5 @@ nohup: ignoring input
 2025-08-11T13:12:24Z INF Registered tunnel connection connIndex=0 connection=10f9b697-b500-4f43-bb17-c2e4c261583f event=0 ip=198.41.200.23 location=pdx02 protocol=quic
 2025-08-11T13:44:29Z ERR  error="Incoming request ended abruptly: context canceled" connIndex=0 event=1 ingressRule=0 originService=http://localhost:3000
 2025-08-11T13:44:29Z ERR Request failed error="Incoming request ended abruptly: context canceled" connIndex=0 dest=https://improvements-investigation-biology-compile.trycloudflare.com/?_rsc=r3yhw event=0 ip=198.41.200.23 type=http
+2025-08-11T13:48:04Z ERR  error="Incoming request ended abruptly: context canceled" connIndex=0 event=1 ingressRule=0 originService=http://localhost:3000
+2025-08-11T13:48:04Z ERR Request failed error="Incoming request ended abruptly: context canceled" connIndex=0 dest=https://improvements-investigation-biology-compile.trycloudflare.com/ event=0 ip=198.41.200.23 type=http
