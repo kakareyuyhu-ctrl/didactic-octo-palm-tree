@@ -99,3 +99,10 @@ Fetching data for LinkToBox...
  ✓ Compiled in 136ms (693 modules)
  ✓ Compiled in 140ms (693 modules)
  ✓ Compiled in 386ms (1409 modules)
+ GET / 200 in 61ms
+Fetching data for LinkToBox...
+ GET /api/storage 200 in 453ms
+ GET /api/files?search=&pid=0 200 in 924ms
+ GET /api/storage 200 in 333ms
+Fetching data for LinkToBox...
+ GET /api/files?search=&pid=0 200 in 1017ms
