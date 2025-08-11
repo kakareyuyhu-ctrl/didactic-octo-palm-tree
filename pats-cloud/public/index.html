@@ -1,0 +1,694 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Pats Cloud</title>
+  <link rel="icon" href="data:," />
+  <style>
+    :root {
+      --bg: #0b0f14;
+      --surface: #121821;
+      --surface-2: #0e141c;
+      --text: #e6edf3;
+      --muted: #9fb3c8;
+      --primary: #60a5fa;
+      --primary-2: #2563eb;
+      --danger: #ef4444;
+      --success: #22c55e;
+      --radius: 14px;
+    }
+    * { box-sizing: border-box; }
+    html, body { height: 100%; }
+    body {
+      margin: 0; font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, Helvetica Neue, Arial;
+      background: radial-gradient(1200px 800px at 10% -10%, #0b1220, var(--bg)),
+                  radial-gradient(800px 600px at 120% 20%, #0b1426, transparent);
+      color: var(--text);
+      display: grid; place-items: center;
+      line-height: 1.3;
+    }
+    .app {
+      width: min(960px, 100%);
+      padding: 16px;
+    }
+    .card {
+      background: linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02));
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: var(--radius);
+      box-shadow: 0 20px 60px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.06);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+    }
+    header.card { padding: 16px 18px; display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+    header h1 { font-size: clamp(18px, 5vw, 22px); margin: 0; letter-spacing: 0.4px; }
+    .muted { color: var(--muted); font-size: 12px; }
+    .content.card { margin-top: 14px; padding: 14px; }
+
+    .row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+    .right { display: flex; gap: 10px; align-items: center; justify-content: flex-end; flex-wrap: wrap; }
+
+    input[type="password"], input[type="text"], .btn, .file-input {
+      border-radius: 12px; border: 1px solid rgba(255,255,255,0.14);
+      background: var(--surface);
+      color: var(--text);
+      padding: 12px 14px; font-size: 14px;
+    }
+    .btn { background: linear-gradient(180deg, var(--primary), var(--primary-2)); border: none; color: white; cursor: pointer; line-height: 1; display: inline-flex; align-items: center; justify-content: center; }
+    .file-input { display: inline-flex; align-items: center; justify-content: center; }
+    .btn.secondary { background: linear-gradient(180deg, #303a49, #202834); }
+    .btn.danger { background: linear-gradient(180deg, #f87171, #ef4444); }
+    .btn:disabled { opacity: 0.6; cursor: not-allowed; }
+
+    .file-drop {
+      border: 1.5px dashed rgba(255,255,255,0.2);
+      border-radius: 14px;
+      padding: 18px; text-align: center; color: var(--muted);
+      background: var(--surface-2);
+    }
+
+    ul.files { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+    .file {
+      display: grid; grid-template-columns: 1fr auto; gap: 8px; align-items: start;
+      padding: 10px; border-radius: 12px;
+      background: linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02));
+      border: 1px solid rgba(255,255,255,0.08);
+    }
+    .file .meta { display: flex; gap: 10px; align-items: flex-start; min-width: 0; flex-wrap: wrap; }
+    .file .meta > * { line-height: 1.2; vertical-align: middle; }
+    .file .name {
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      word-break: break-word;
+      max-width: 100%;
+      line-height: 1.2;
+    }
+    .file .name .ext { color: var(--muted); }
+    .file .actions { display: flex; gap: 6px; align-items: center; align-self: start; }
+
+    .upload-item { padding: 10px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1); background: var(--surface-2); }
+    .progress { height: 8px; background: rgba(255,255,255,0.12); border-radius: 999px; overflow: hidden; }
+    .progress > div { height: 100%; width: 0%; background: linear-gradient(90deg, var(--primary), var(--primary-2)); transition: width 0.15s ease; }
+    .small { font-size: 12px; color: var(--muted); line-height: 1.2; }
+
+    .spacer { flex: 1; }
+    .hidden { display: none !important; }
+
+    @media (hover: hover) {
+      .file:hover { border-color: rgba(255,255,255,0.22); }
+    }
+
+    @media (max-width: 480px) {
+      header h1 { font-size: 18px; }
+      .btn { padding: 10px 12px; font-size: 13px; }
+      .file .meta { gap: 6px; }
+      .file { grid-template-columns: 1fr; }
+      .actions { justify-content: flex-start; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header class="card">
+      <h1>😻 Pats Cloud</h1>
+      <div class="right">
+        <small id="storage" class="muted" style="text-align:right"></small>
+        <small id="status" class="muted">Not signed in</small>
+        <button id="logoutBtn" class="btn secondary hidden">Logout</button>
+      </div>
+    </header>
+
+    <section id="loginView" class="content card">
+      <div class="row">
+        <input id="password" type="password" inputmode="text" placeholder="Enter password" style="flex:1" />
+        <button id="loginBtn" class="btn">Sign In</button>
+      </div>
+    </section>
+
+    <section id="appView" class="content card hidden">
+      <div class="row" style="gap:8px; align-items: stretch;">
+        <label class="file-input" style="display:inline-flex; align-items:center; gap:10px; cursor:pointer;">
+          <input id="fileInput" type="file" multiple style="display:none" />
+          <span>Choose files</span>
+        </label>
+        <select id="folderSelect" class="btn secondary" style="background: var(--surface); border: 1px solid rgba(255,255,255,0.14); color: var(--text);">
+          <option value="">/ (root)</option>
+        </select>
+        <button id="createFolderBtn" class="btn secondary">+ Folder</button>
+        <div class="spacer"></div>
+        <div class="row" id="tabs" style="gap:6px">
+          <button class="btn secondary" data-sort="recent">Recent</button>
+          <button class="btn secondary" data-sort="name">Name</button>
+          <button class="btn secondary" data-sort="size">Size</button>
+        </div>
+        <button id="refreshBtn" class="btn secondary">Refresh</button>
+      </div>
+
+      <div id="teraBoxCard" class="card" style="margin-top:10px; padding:12px; display:none">
+        <div class="row" style="justify-content:space-between; align-items:center">
+          <div>
+            <div style="font-weight:600">Connect TeraBox (one-time)</div>
+            <div class="small">Paste ndus/appId/uploadId once. We store securely on the server so mirroring is automatic.</div>
+          </div>
+        </div>
+        <div class="row" style="gap:8px; margin-top:8px; flex-wrap:wrap">
+          <input id="tbNdus" class="file-input" type="text" placeholder="ndus" style="flex:1; min-width:200px" />
+          <input id="tbAppId" class="file-input" type="text" placeholder="appId (e.g., 250528)" style="width:200px" />
+          <input id="tbUploadId" class="file-input" type="text" placeholder="uploadId (optional)" style="flex:1; min-width:240px" />
+          <input id="tbJsToken" class="file-input" type="text" placeholder="jsToken (optional)" style="flex:1; min-width:240px" />
+          <input id="tbBrowserId" class="file-input" type="text" placeholder="browserId (optional)" style="flex:1; min-width:240px" />
+          <input id="tbDir" class="file-input" type="text" placeholder="dir (e.g., /)" style="width:160px" value="/" />
+          <button id="tbSave" class="btn">Save</button>
+        </div>
+      </div>
+
+      <div id="drop" class="file-drop" style="margin-top:10px">Drop files here to upload</div>
+
+      <ul id="fileList" class="files" style="margin-top:12px"></ul>
+
+      <div id="uploadsContainer" style="margin-top:12px">
+        <div class="small">In progress</div>
+        <ul id="uploads" class="files"></ul>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    const loginView = document.getElementById('loginView');
+    const appView = document.getElementById('appView');
+    const statusEl = document.getElementById('status');
+    const storageEl = document.getElementById('storage');
+    const logoutBtn = document.getElementById('logoutBtn');
+    const loginBtn = document.getElementById('loginBtn');
+    const passwordEl = document.getElementById('password');
+    const fileInput = document.getElementById('fileInput');
+    const fileList = document.getElementById('fileList');
+    const drop = document.getElementById('drop');
+    const refreshBtn = document.getElementById('refreshBtn');
+    const uploadsList = document.getElementById('uploads');
+    const tabs = document.getElementById('tabs');
+    const folderSelect = document.getElementById('folderSelect');
+    const createFolderBtn = document.getElementById('createFolderBtn');
+    const teraBoxCard = document.getElementById('teraBoxCard');
+    const tbNdus = document.getElementById('tbNdus');
+    const tbAppId = document.getElementById('tbAppId');
+    const tbUploadId = document.getElementById('tbUploadId');
+    const tbJsToken = document.getElementById('tbJsToken');
+    const tbBrowserId = document.getElementById('tbBrowserId');
+    const tbDir = document.getElementById('tbDir');
+    const tbSave = document.getElementById('tbSave');
+
+    let authed = false;
+    let currentSort = 'recent';
+    let currentFiles = [];
+    let currentFolder = '';
+
+    async function api(path, opts = {}) {
+      const res = await fetch(path, {
+        ...opts,
+        headers: {
+          'Content-Type': 'application/json',
+          ...(opts.headers || {}),
+        },
+        credentials: 'same-origin',
+      });
+      if (!res.ok) throw new Error(await res.text());
+      return res.headers.get('content-type')?.includes('application/json') ? res.json() : res.text();
+    }
+
+    function setLoggedIn(v) {
+      authed = v;
+      loginView.classList.toggle('hidden', v);
+      appView.classList.toggle('hidden', !v);
+      logoutBtn.classList.toggle('hidden', !v);
+      statusEl.textContent = v ? 'Signed in' : 'Not signed in';
+      if (v) loadStorage(); else storageEl.textContent = '';
+      if (v) checkCloudStatus();
+    }
+
+    loginBtn.addEventListener('click', async () => {
+      try {
+        const body = JSON.stringify({ password: passwordEl.value });
+        const data = await api('/login', { method: 'POST', body });
+        setLoggedIn(true);
+        if (data?.warning) alert(data.warning);
+        await loadFiles();
+      } catch (e) {
+        alert('Login failed');
+      }
+    });
+
+    logoutBtn.addEventListener('click', async () => {
+      try { await api('/logout', { method: 'POST' }); } catch {}
+      setLoggedIn(false);
+    });
+
+    async function loadFiles() {
+      fileList.innerHTML = '<li class="muted">Loading…</li>';
+      try {
+        const qs = currentFolder ? `?folder=${encodeURIComponent(currentFolder)}` : '';
+        const data = await api(`/api/files${qs}`);
+        renderFiles(data.files || []);
+        await loadStorage();
+      } catch (e) {
+        fileList.innerHTML = '<li class="muted">Sign in to view files</li>';
+      }
+    }
+
+    async function loadStorage() {
+      try {
+        const s = await api('/api/storage');
+        if (s && typeof s.totalBytes === 'number') {
+          const used = s.usedBytesUploads || 0;
+          const free = s.freeBytes || 0;
+          const total = s.totalBytes || 0;
+          storageEl.textContent = `Storage: ${formatBytes(used)} used • ${formatBytes(free)} free of ${formatBytes(total)}`;
+        }
+      } catch {
+        storageEl.textContent = '';
+      }
+    }
+
+    async function checkCloudStatus() {
+      try {
+        const st = await api('/api/cloud/status');
+        if (st && st.enabled) {
+          teraBoxCard.style.display = 'none';
+        } else {
+          // Show one-time connect UI
+          teraBoxCard.style.display = '';
+        }
+      } catch {
+        teraBoxCard.style.display = '';
+      }
+    }
+
+    function renderFiles(files) {
+      currentFiles = files.slice();
+      if (currentSort === 'name') {
+        currentFiles.sort((a,b) => a.name.localeCompare(b.name));
+      } else if (currentSort === 'size') {
+        currentFiles.sort((a,b) => b.size - a.size);
+      } else {
+        currentFiles.sort((a,b) => b.modifiedAt - a.modifiedAt);
+      }
+      if (!currentFiles.length) {
+        fileList.innerHTML = '<li class="muted">No files yet</li>';
+        return;
+      }
+      fileList.innerHTML = '';
+      for (const f of currentFiles) {
+        const li = document.createElement('li');
+        li.className = 'file';
+        const sizeLabel = formatBytes(f.size);
+        const date = new Date(f.modifiedAt).toLocaleString();
+        const { base, ext, display } = formatFilenameForMobile(f.name);
+        li.innerHTML = `
+          <div class="meta">
+            <div class="name filename" data-full="${escapeHtml(f.name)}" data-base="${escapeHtml(base)}" data-ext="${escapeHtml(ext)}" title="${escapeHtml(f.name)}">${display}</div>
+            <div class="muted">${sizeLabel}</div>
+            <div class="muted">•</div>
+            <div class="muted">${date}</div>
+          </div>
+          <div class="actions">
+            <a class="btn secondary" href="/download/${encodeURIComponent(f.name)}${currentFolder ? `?folder=${encodeURIComponent(currentFolder)}` : ''}">Download</a>
+            <button class="btn secondary" data-dl="${encodeURIComponent(f.name)}">Boost DL</button>
+            <button class="btn danger">Delete</button>
+          </div>
+        `;
+        li.querySelector('.btn.danger').addEventListener('click', async () => {
+          if (!confirm('Delete this file?')) return;
+          const url = `/api/files/${encodeURIComponent(f.name)}${currentFolder ? `?folder=${encodeURIComponent(currentFolder)}` : ''}`;
+          const res = await fetch(url, { method: 'DELETE' });
+          if (!res.ok) { alert('Failed to delete'); return; }
+          await loadFiles();
+        });
+        li.querySelector('[data-dl]')?.addEventListener('click', () => acceleratedDownload(f.name, f.size));
+        li.querySelector('.filename')?.addEventListener('click', toggleFilenameExpand);
+        fileList.appendChild(li);
+      }
+    }
+    function toggleFilenameExpand(e) {
+      const el = e.currentTarget;
+      const full = el.getAttribute('data-full');
+      const base = el.getAttribute('data-base');
+      const ext = el.getAttribute('data-ext');
+      const expanded = el.getAttribute('data-expanded') === '1';
+      if (expanded) {
+        const { display } = formatFilenameForMobile(full);
+        el.innerHTML = display;
+        el.setAttribute('data-expanded', '0');
+      } else {
+        el.innerHTML = `<span class="base">${base}</span><span class="ext">${ext}</span>`;
+        el.setAttribute('data-expanded', '1');
+      }
+    }
+
+    function escapeHtml(s) {
+      return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;','\'':'&#39;'}[c]));
+    }
+
+    function formatFilenameForMobile(name) {
+      const dot = name.lastIndexOf('.');
+      const base = dot > 0 ? name.slice(0, dot) : name;
+      const ext = dot > 0 ? name.slice(dot) : '';
+      const max = (typeof window !== 'undefined' && window.innerWidth) ? (window.innerWidth < 360 ? 16 : window.innerWidth < 420 ? 22 : 28) : 22;
+      const soft = base.replace(/([._-])/g, '$1\u200b');
+      let shown = soft;
+      if (base.length > max) {
+        const head = base.slice(0, Math.ceil(max * 0.6));
+        const tail = base.slice(-Math.floor(max * 0.3));
+        shown = `${head}…${tail}`.replace(/([._-])/g, '$1\u200b');
+      }
+      const display = `<span class="base">${escapeHtml(shown)}</span><span class="ext">${escapeHtml(ext)}</span>`;
+      return { base, ext, display };
+    }
+    tabs.addEventListener('click', (e) => {
+      const btn = e.target.closest('button[data-sort]');
+      if (!btn) return;
+      currentSort = btn.dataset.sort;
+      renderFiles(currentFiles);
+    });
+
+    async function acceleratedDownload(fileName, fileSize) {
+      try {
+        const url = `/file/${encodeURIComponent(fileName)}${currentFolder ? `?folder=${encodeURIComponent(currentFolder)}` : ''}`;
+        const parallel = Math.min(2, Math.ceil(fileSize / (8 * 1024 * 1024)) || 1);
+        const chunkSize = Math.ceil(fileSize / parallel);
+        const ranges = Array.from({ length: parallel }, (_, i) => ({
+          start: i * chunkSize,
+          end: Math.min(fileSize - 1, (i + 1) * chunkSize - 1),
+        })).filter(r => r.start <= r.end);
+
+        async function fetchWithRetry(r, attempts = 3) {
+          let lastErr;
+          for (let i = 0; i < attempts; i++) {
+            try {
+              const res = await fetch(url, { headers: { Range: `bytes=${r.start}-${r.end}` }, credentials: 'same-origin' });
+              if (res.status !== 206 && res.status !== 200) throw new Error('range fetch failed');
+              const buf = await res.arrayBuffer();
+              return { start: r.start, buf };
+            } catch (e) { lastErr = e; await new Promise(r => setTimeout(r, 250 * (i + 1))); }
+          }
+          throw lastErr || new Error('range fetch failed');
+        }
+        const parts = await Promise.all(ranges.map((r) => fetchWithRetry(r)));
+        parts.sort((a,b) => a.start - b.start);
+        const total = parts.reduce((n,p) => n + p.buf.byteLength, 0);
+        const out = new Uint8Array(total);
+        let offset = 0;
+        for (const p of parts) { out.set(new Uint8Array(p.buf), offset); offset += p.buf.byteLength; }
+
+        const blob = new Blob([out]);
+        const a = document.createElement('a');
+        const href = URL.createObjectURL(blob);
+        a.href = href;
+        a.download = fileName;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        setTimeout(() => URL.revokeObjectURL(href), 1000);
+      } catch (e) {
+        // fallback
+        location.href = `/download/${encodeURIComponent(fileName)}${currentFolder ? `?folder=${encodeURIComponent(currentFolder)}` : ''}`;
+      }
+    }
+
+    function formatBytes(b) {
+      const units = ['B','KB','MB','GB','TB'];
+      let i = 0; let v = b;
+      while (v >= 1024 && i < units.length - 1) { v /= 1024; i++; }
+      return `${v.toFixed(v >= 100 ? 0 : v >= 10 ? 1 : 2)} ${units[i]}`;
+    }
+
+    tbSave?.addEventListener('click', async () => {
+      try {
+        const ndus = tbNdus.value.trim();
+        const appId = tbAppId.value.trim();
+        const uploadId = tbUploadId.value.trim();
+        const dir = tbDir.value.trim() || '/';
+        const jsToken = (tbJsToken.value || '').trim();
+        const browserId = (tbBrowserId.value || '').trim();
+        if (!ndus || !appId) { alert('Fill ndus and appId'); return; }
+        const res = await fetch('/api/cloud/terabox', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'same-origin',
+          body: JSON.stringify({ ndus, appId, dir, ...(uploadId?{uploadId}:{}) , ...(jsToken?{jsToken}:{}) , ...(browserId?{browserId}:{}) })
+        });
+        if (!res.ok) throw new Error('Failed to save');
+        teraBoxCard.style.display = 'none';
+        alert('TeraBox connected. New uploads will mirror automatically.');
+      } catch {
+        alert('Failed to connect TeraBox');
+      }
+    });
+
+    async function uploadFiles(files) {
+      if (!files?.length) return;
+      for (const file of files) {
+        try {
+          await uploadFileSequential(file);
+        } catch {
+          void uploadFileChunked(file);
+        }
+      }
+    }
+
+    async function uploadFileSequential(file) {
+      const { base: baseUp, ext: extUp, display: displayUp } = formatFilenameForMobile(file.name);
+      const li = document.createElement('li');
+      li.className = 'upload-item';
+      li.innerHTML = `
+        <div class="row" style="justify-content:space-between; gap:10px; align-items:center">
+          <div class="name filename" style="flex:1; min-width:0" data-full="${escapeHtml(file.name)}" data-base="${escapeHtml(baseUp)}" data-ext="${escapeHtml(extUp)}" title="${escapeHtml(file.name)}">${displayUp}</div>
+          <div class="small">${formatBytes(file.size)}</div>
+        </div>
+        <div class="progress" style="margin-top:8px"><div></div></div>
+        <div class="small" style="margin-top:6px; display:flex; gap:8px; align-items:center"><span class="pct">0%</span><span>•</span><span class="speed">0 MB/s</span><span>•</span><span class="eta">—</span></div>
+      `;
+      uploadsList.appendChild(li);
+      li.querySelector('.filename')?.addEventListener('click', toggleFilenameExpand);
+      const bar = li.querySelector('.progress > div');
+      const pctEl = li.querySelector('.pct');
+      const speedEl = li.querySelector('.speed');
+      const etaEl = li.querySelector('.eta');
+
+      return new Promise((resolve, reject) => {
+        const xhr = new XMLHttpRequest();
+        const target = currentFolder ? `/api/upload?folder=${encodeURIComponent(currentFolder)}` : '/api/upload';
+        xhr.open('POST', target, true);
+        xhr.withCredentials = true;
+        const form = new FormData();
+        form.append('files', file);
+        const t0 = performance.now();
+        let lastTime = t0;
+        let lastLoaded = 0;
+        xhr.upload.onprogress = (e) => {
+          const loaded = e.loaded;
+          const now = performance.now();
+          const dt = (now - lastTime) / 1000;
+          if (dt >= 0.3) {
+            const ds = loaded - lastLoaded;
+            const speed = ds / dt; // bytes/s
+            speedEl.textContent = `${(speed / (1024*1024)).toFixed(2)} MB/s`;
+            const remaining = file.size - loaded;
+            const eta = speed > 0 ? remaining / speed : 0;
+            etaEl.textContent = eta ? `${Math.ceil(eta)}s left` : '—';
+            lastTime = now;
+            lastLoaded = loaded;
+          }
+          const p = Math.round((loaded / file.size) * 100);
+          bar.style.width = `${p}%`;
+          pctEl.textContent = `${p}%`;
+        };
+        xhr.onload = async () => {
+          if (xhr.status >= 200 && xhr.status < 300) {
+            bar.style.width = '100%';
+            pctEl.textContent = '100%';
+            etaEl.textContent = 'Done';
+            try { await loadFiles(); } catch {}
+            setTimeout(() => li.remove(), 1200);
+            resolve();
+          } else {
+            li.querySelector('.name').textContent += ' — failed';
+            bar.style.background = 'linear-gradient(180deg, #f87171, #ef4444)';
+            reject(new Error('sequential failed'));
+          }
+        };
+        xhr.onerror = () => {
+          li.querySelector('.name').textContent += ' — failed';
+          bar.style.background = 'linear-gradient(180deg, #f87171, #ef4444)';
+          reject(new Error('sequential failed'));
+        };
+        xhr.send(form);
+      });
+    }
+
+    async function uploadFileChunked(file, opts) {
+      const chunkSize = opts?.chunkSize ?? 1 * 1024 * 1024; // default 1MB
+      const concurrency = opts?.concurrency ?? 1; // default parallel 1
+      const attempt = opts?.attempt ?? 1;
+      const totalChunks = Math.ceil(file.size / chunkSize);
+      const { base: baseUp, ext: extUp, display: displayUp } = formatFilenameForMobile(file.name)
+      const li = document.createElement('li');
+      li.className = 'upload-item';
+      li.innerHTML = `
+        <div class="row" style="justify-content:space-between; gap:10px; align-items:center">
+          <div class="name filename" style="flex:1; min-width:0" data-full="${escapeHtml(file.name)}" data-base="${escapeHtml(baseUp)}" data-ext="${escapeHtml(extUp)}" title="${escapeHtml(file.name)}">${displayUp}</div>
+          <div class="small">${formatBytes(file.size)}</div>
+        </div>
+        <div class="progress" style="margin-top:8px"><div></div></div>
+        <div class="small" style="margin-top:6px; display:flex; gap:8px; align-items:center"><span class="pct">0%</span><span>•</span><span class="speed">0 MB/s</span><span>•</span><span class="eta">—</span></div>
+      `;
+      uploadsList.appendChild(li);
+      li.querySelector('.filename')?.addEventListener('click', toggleFilenameExpand);
+      const bar = li.querySelector('.progress > div');
+      const pctEl = li.querySelector('.pct');
+      const speedEl = li.querySelector('.speed');
+      const etaEl = li.querySelector('.eta');
+
+      const t0 = performance.now();
+      let uploaded = 0;
+      let lastTime = t0;
+      let lastUploaded = 0;
+      let uploadId = '';
+      const controller = new AbortController();
+      let failed = false;
+
+      try {
+        const initRes = await fetch('/api/upload/init', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'same-origin',
+          body: JSON.stringify({ filename: file.name, size: file.size, chunkSize, totalChunks, folder: currentFolder }),
+        });
+        if (!initRes.ok) throw new Error('init failed');
+        ({ uploadId } = await initRes.json());
+
+        const nextIndex = (() => {
+          let idx = 0;
+          return () => (idx < totalChunks ? idx++ : -1);
+        })();
+
+        async function uploadOne() {
+          while (true) {
+            if (controller.signal.aborted || failed) break;
+            const i = nextIndex();
+            if (i === -1) break;
+            const start = i * chunkSize;
+            const end = Math.min(file.size, start + chunkSize);
+            const chunk = file.slice(start, end);
+            async function putWithRetry(attempts = 3) {
+              let lastErr;
+              for (let k = 0; k < attempts; k++) {
+                try {
+                  if (controller.signal.aborted) throw new Error('aborted');
+                  const url = `/api/upload/chunk?uploadId=${encodeURIComponent(uploadId)}&index=${i}`;
+                  const res = await fetch(url, {
+                    method: 'PUT',
+                    body: chunk,
+                    credentials: 'same-origin',
+                    signal: controller.signal,
+                  });
+                  if (!res.ok) throw new Error('chunk failed');
+                  return;
+                } catch (e) { lastErr = e; await new Promise(r => setTimeout(r, 250 * (k + 1))); }
+              }
+              throw lastErr || new Error('chunk failed');
+            }
+            await putWithRetry();
+            uploaded += chunk.size;
+            const now = performance.now();
+            const dt = (now - lastTime) / 1000;
+            if (dt >= 0.3) {
+              const ds = uploaded - lastUploaded;
+              const speed = ds / dt; // bytes/s
+              speedEl.textContent = `${(speed / (1024*1024)).toFixed(2)} MB/s`;
+              const remaining = file.size - uploaded;
+              const eta = speed > 0 ? remaining / speed : 0;
+              etaEl.textContent = eta ? `${Math.ceil(eta)}s left` : '—';
+              lastTime = now;
+              lastUploaded = uploaded;
+            }
+            const p = Math.round((uploaded / file.size) * 100);
+            bar.style.width = `${p}%`;
+            pctEl.textContent = `${p}%`;
+          }
+        }
+
+        const workers = Array.from({ length: Math.min(concurrency, totalChunks) }, uploadOne);
+        await Promise.all(workers.map((fn) => fn()));
+
+        const fin = await fetch('/api/upload/complete', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'same-origin',
+          body: JSON.stringify({ uploadId }),
+        });
+        if (!fin.ok) throw new Error('complete failed');
+        bar.style.width = '100%';
+        pctEl.textContent = '100%';
+        etaEl.textContent = 'Done';
+      } catch (e) {
+        failed = true;
+        controller.abort();
+        // Fallback once with safer settings
+        if (attempt === 1) {
+          try { if (uploadId) await fetch(`/api/upload/abort/${encodeURIComponent(uploadId)}`, { method: 'DELETE', credentials: 'same-origin' }); } catch {}
+          return uploadFileChunked(file, { chunkSize: 1 * 1024 * 1024, concurrency: 1, attempt: 2 });
+        }
+        li.querySelector('.name').textContent += ' — failed';
+        bar.style.background = 'linear-gradient(180deg, #f87171, #ef4444)';
+      } finally {
+        await loadFiles();
+        setTimeout(() => li.remove(), 1500);
+      }
+    }
+
+    fileInput.addEventListener('change', (e) => uploadFiles(e.target.files));
+
+    ;['dragenter','dragover'].forEach(ev => drop.addEventListener(ev, (e) => {
+      e.preventDefault(); e.stopPropagation();
+      drop.style.borderColor = 'rgba(96,165,250,0.7)';
+    }));
+    ;['dragleave','drop'].forEach(ev => drop.addEventListener(ev, (e) => {
+      e.preventDefault(); e.stopPropagation();
+      drop.style.borderColor = 'rgba(255,255,255,0.2)';
+    }));
+    drop.addEventListener('drop', (e) => uploadFiles(e.dataTransfer.files));
+
+    refreshBtn.addEventListener('click', loadFiles);
+    setInterval(() => { if (authed) loadStorage(); }, 15000);
+    folderSelect.addEventListener('change', () => {
+      currentFolder = folderSelect.value || '';
+      loadFiles();
+    });
+    createFolderBtn.addEventListener('click', async () => {
+      const name = prompt('New folder name:');
+      if (!name) return;
+      const res = await fetch('/api/folders', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'same-origin', body: JSON.stringify({ name })
+      });
+      if (!res.ok) { alert('Failed to create folder'); return; }
+      await loadFolders();
+    });
+    async function loadFolders() {
+      try {
+        const res = await fetch('/api/folders', { credentials: 'same-origin' });
+        if (!res.ok) return;
+        const data = await res.json();
+        const cur = folderSelect.value;
+        folderSelect.innerHTML = `<option value="">/ (root)</option>` + (data.folders || []).map(f => `<option value="${f}">${f}</option>`).join('');
+        folderSelect.value = cur || '';
+      } catch {}
+    }
+
+    // Attempt to load files to detect session state on first paint
+    loadFiles().then(() => { setLoggedIn(true); loadFolders(); }).catch(() => setLoggedIn(false));
+  </script>
+</body>
+</html>
