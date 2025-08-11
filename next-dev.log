@@ -367,3 +367,66 @@ Fetching data for LinkToBox...
  GET /api/files?search=&pid=0 200 in 686ms
  ✓ Compiled in 163ms (693 modules)
  ✓ Compiled in 198ms (1409 modules)
+ ✓ Compiled /_not-found in 171ms (1360 modules)
+ ⨯ Error: ENOENT: no such file or directory, open '/workspace/jemph-cloud-storage/.next/server/middleware-manifest.json'
+    at Object.readFileSync (node:fs:442:20)
+    at defaultLoadImpl (node:internal/modules/cjs/loader:1124:17)
+    at loadSource (node:internal/modules/cjs/loader:1757:20)
+    at Object..json (node:internal/modules/cjs/loader:1904:31)
+    at Module.load (node:internal/modules/cjs/loader:1465:32)
+    at Function._load (node:internal/modules/cjs/loader:1282:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+    at Module.<anonymous> (node:internal/modules/cjs/loader:1487:12)
+    at mod.require (/workspace/jemph-cloud-storage/node_modules/next/dist/server/require-hook.js:65:28)
+    at require (node:internal/modules/helpers:135:16)
+    at DevServer.getMiddlewareManifest (/workspace/jemph-cloud-storage/node_modules/next/dist/server/next-server.js:932:26)
+    at DevServer.getEdgeFunctionsPages (/workspace/jemph-cloud-storage/node_modules/next/dist/server/next-server.js:948:31)
+    at DevServer.renderErrorToResponseImpl (/workspace/jemph-cloud-storage/node_modules/next/dist/server/next-server.js:907:22)
+    at async DevServer.pipeImpl (/workspace/jemph-cloud-storage/node_modules/next/dist/server/base-server.js:921:25)
+    at async NextNodeServer.handleCatchallRenderRequest (/workspace/jemph-cloud-storage/node_modules/next/dist/server/next-server.js:231:21)
+    at async DevServer.handleRequestImpl (/workspace/jemph-cloud-storage/node_modules/next/dist/server/base-server.js:817:17)
+    at async /workspace/jemph-cloud-storage/node_modules/next/dist/server/dev/next-dev-server.js:339:20
+    at async Span.traceAsyncFn (/workspace/jemph-cloud-storage/node_modules/next/dist/trace/trace.js:154:20)
+    at async DevServer.handleRequest (/workspace/jemph-cloud-storage/node_modules/next/dist/server/dev/next-dev-server.js:336:24)
+    at async invokeRender (/workspace/jemph-cloud-storage/node_modules/next/dist/server/lib/router-server.js:173:21)
+    at async handleRequest (/workspace/jemph-cloud-storage/node_modules/next/dist/server/lib/router-server.js:350:24)
+    at async requestHandlerImpl (/workspace/jemph-cloud-storage/node_modules/next/dist/server/lib/router-server.js:374:13)
+    at async Server.requestListener (/workspace/jemph-cloud-storage/node_modules/next/dist/server/lib/start-server.js:141:13) {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: '/workspace/jemph-cloud-storage/.next/server/middleware-manifest.json'
+}
+ ○ Compiling /_error ...
+ ✓ Compiled /_error in 978ms (1586 modules)
+ GET / 500 in 1293ms
+ ⨯ Error: ENOENT: no such file or directory, open '/workspace/jemph-cloud-storage/.next/server/middleware-manifest.json'
+    at Object.readFileSync (node:fs:442:20)
+    at defaultLoadImpl (node:internal/modules/cjs/loader:1124:17)
+    at loadSource (node:internal/modules/cjs/loader:1757:20)
+    at Object..json (node:internal/modules/cjs/loader:1904:31)
+    at Module.load (node:internal/modules/cjs/loader:1465:32)
+    at Function._load (node:internal/modules/cjs/loader:1282:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+    at Module.<anonymous> (node:internal/modules/cjs/loader:1487:12)
+    at mod.require (/workspace/jemph-cloud-storage/node_modules/next/dist/server/require-hook.js:65:28)
+    at require (node:internal/modules/helpers:135:16)
+    at DevServer.getMiddlewareManifest (/workspace/jemph-cloud-storage/node_modules/next/dist/server/next-server.js:932:26)
+    at DevServer.getEdgeFunctionsPages (/workspace/jemph-cloud-storage/node_modules/next/dist/server/next-server.js:948:31)
+    at NextNodeServer.handleCatchallRenderRequest (/workspace/jemph-cloud-storage/node_modules/next/dist/server/next-server.js:238:49)
+    at async DevServer.handleRequestImpl (/workspace/jemph-cloud-storage/node_modules/next/dist/server/base-server.js:817:17)
+    at async /workspace/jemph-cloud-storage/node_modules/next/dist/server/dev/next-dev-server.js:339:20
+    at async Span.traceAsyncFn (/workspace/jemph-cloud-storage/node_modules/next/dist/trace/trace.js:154:20)
+    at async DevServer.handleRequest (/workspace/jemph-cloud-storage/node_modules/next/dist/server/dev/next-dev-server.js:336:24)
+    at async invokeRender (/workspace/jemph-cloud-storage/node_modules/next/dist/server/lib/router-server.js:173:21)
+    at async handleRequest (/workspace/jemph-cloud-storage/node_modules/next/dist/server/lib/router-server.js:350:24)
+    at async requestHandlerImpl (/workspace/jemph-cloud-storage/node_modules/next/dist/server/lib/router-server.js:374:13)
+    at async Server.requestListener (/workspace/jemph-cloud-storage/node_modules/next/dist/server/lib/start-server.js:141:13) {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: '/workspace/jemph-cloud-storage/.next/server/middleware-manifest.json'
+}
+ GET / 500 in 13ms
